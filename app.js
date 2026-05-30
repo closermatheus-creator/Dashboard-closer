@@ -120,9 +120,10 @@ function renderLeadsTable() {
         if (lead.statusDiag === "Aprovado para Pitch") badgeDiag = "p-badge-success";
         if (lead.statusDiag === "No-Show") badgeDiag = "p-badge-danger";
 
+        // Adicionado cursor pointer e o gatilho window.editLead(id) direto na TD do Lead
         tr.innerHTML = `
-            <td>
-                <span class="lead-main-name">${lead.nome}</span>
+            <td onclick="window.editLead('${lead.id}')" style="cursor: pointer;" title="Clique para editar este lead">
+                <span class="lead-main-name" style="text-decoration: underline; text-decoration-color: transparent; transition: text-decoration-color 0.2s;">${lead.nome}</span>
                 <span class="lead-co-name">${lead.empresa || 'Sem Empresa'}</span>
             </td>
             <td style="font-weight: 600;">${lead.faturamento || '—'}</td>

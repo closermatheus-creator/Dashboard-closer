@@ -700,3 +700,8 @@ body {
 .calendar-import-row.suggested {
     background-color: rgba(0, 242, 254, 0.02);
 }
+/* Efeito de destaque ao passar o mouse no nome do lead na tabela */
+.parhub-premium-table tbody tr td:first-child:hover .lead-main-name {
+    color: var(--neon-accent) !important;
+    text-decoration-color: var(--neon-accent) !important;
+}
