@@ -1,0 +1,22 @@
+/* Customizações extras para refinar a paleta do CRM */
+input-field {
+    transition: all 0.2s ease-in-out;
+}
+
+input-field:focus {
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.card-metric {
+    transition: transform 0.2s ease-in-out, background-color 0.3s ease;
+}
+
+.card-metric:hover {
+    transform: translateY(-2px);
+}
+
+/* Ajustes para os gráficos não quebrarem o layout */
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
