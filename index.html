@@ -3,166 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Performance - Closer</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>PARHUB Closer - Agência Rei</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body id="bodyApp" class="bg-[#0f111a] text-[#dbdee9] font-sans min-h-screen transition-colors duration-300">
-
-    <nav id="navApp" class="bg-[#161925] border-b border-[#23283d] p-4 sticky top-0 z-50 transition-colors duration-300">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <div class="w-3 h-3 rounded-full bg-[#00f0ff] animate-pulse"></div>
-                <h1 id="tituloApp" class="text-lg font-bold tracking-wider text-[#ffffff]">CLOSER <span class="text-[#00f0ff]">PERFORMANCE</span></h1>
+<body class="dark-theme"> <div class="dashboard-layout">
+        
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="logo-neon">
+                    <i class="fa-solid fa-bolt"></i> <span>PARHUB</span>
+                </div>
+                <span class="sub-brand">CRM de Fechamento</span>
             </div>
             
-            <div class="flex items-center space-x-4">
-                <button onclick="alternarModo()" id="btnModo" class="bg-[#0f111a] text-sm py-1.5 px-3 rounded-lg border border-[#23283d] transition cursor-pointer">☀️ Modo Claro</button>
-                <button onclick="exportarExcel()" class="bg-[#1d4ed8] hover:bg-[#2563eb] text-white font-medium py-1.5 px-4 rounded border border-[#00f0ff]/30 shadow-[0_0_15px_rgba(0,240,255,0.1)] transition text-xs uppercase tracking-wider font-semibold cursor-pointer">📥 Exportar Planilha (.csv)</button>
+            <div class="user-profile-side">
+                <div class="avatar">MS</div>
+                <div class="user-info">
+                    <span class="welcome">Bem-vindo de volta</span>
+                    <span class="username">Matheus Santos</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-item active" id="btn-tab-mesa" onclick="switchTab('mesa')">
+                    <i class="fa-solid fa-table-list"></i> Mesa de Operações
+                </button>
+                <button class="nav-item" id="btn-tab-insights" onclick="switchTab('insights')">
+                    <i class="fa-solid fa-chart-pie"></i> Overview & Insights
+                </button>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <span>v2.0.0</span>
+            </div>
+        </aside>
+
+        <div class="main-wrapper">
+            
+            <header class="top-meta-bar">
+                <div class="page-title-area">
+                    <h1 id="current-page-title">Mesa de Operações</h1>
+                    <p class="page-subtitle">Visão geral da sua mesa de vendas high-ticket</p>
+                </div>
+                <div class="top-actions">
+                    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Alternar Tema">
+                        <i class="fa-solid fa-sun" id="theme-icon"></i>
+                    </button>
+                </div>
+            </header>
+
+            <main class="main-content">
+                
+                <section id="tab-mesa" class="tab-content active-content">
+                    <div class="action-bar">
+                        <div class="search-placeholder"></div>
+                        <button class="btn-neon" onclick="openNewLeadModal()">
+                            <i class="fa-solid fa-plus"></i> Inserir Novo Lead
+                        </button>
+                    </div>
+
+                    <div class="parhub-card table-card">
+                        <div class="table-responsive">
+                            <table class="leads-table">
+                                <thead>
+                                    <tr>
+                                        <th>Lead / Empresa</th>
+                                        <th>Faturamento</th>
+                                        <th>SDR / Origem</th>
+                                        <th>Agendamento</th>
+                                        <th>Diagnóstico</th>
+                                        <th>Ações Pitch</th>
+                                        <th>Desfecho / Valor</th>
+                                        <th>Pagamento</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leads-container">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="tab-insights" class="tab-content">
+                    
+                    <div class="metrics-summary-grid">
+                        <div class="parhub-card stat-card border-neon">
+                            <div class="card-meta">Esta Semana</div>
+                            <div class="card-main-val" id="metrics-week-money">R$ 0,00</div>
+                            <div class="card-sub-val" id="metrics-week-conv">Conversão: 0%</div>
+                        </div>
+                        <div class="parhub-card stat-card border-neon">
+                            <div class="card-meta">Esta Quinzena</div>
+                            <div class="card-main-val" id="metrics-fortnight-money">R$ 0,00</div>
+                            <div class="card-sub-val" id="metrics-fortnight-conv">Conversão: 0%</div>
+                        </div>
+                        <div class="parhub-card stat-card border-neon">
+                            <div class="card-meta">Este Mês</div>
+                            <div class="card-main-val" id="metrics-month-money">R$ 0,00</div>
+                            <div class="card-sub-val" id="metrics-month-conv">Conversão: 0%</div>
+                        </div>
+                    </div>
+
+                    <div class="parhub-card filter-card">
+                        <div class="filter-group">
+                            <label for="filter-sdr-select"><i class="fa-solid fa-user-gear"></i> Raio-X do SDR:</label>
+                            <select id="filter-sdr-select" onchange="calculateAdvancedMetrics()">
+                                <option value="todos">Todos os SDRs (Geral)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="analytics-row-grid">
+                        <div class="parhub-card intelligence-card">
+                            <div class="intel-header">
+                                <i class="fa-solid fa-chart-bar"></i>
+                                <div>
+                                    <h4>Taxa de Pitch</h4>
+                                    <span>Efetividade do SDR pós-filtro</span>
+                                </div>
+                            </div>
+                            <div class="intel-big-num" id="sdr-pitch-rate">0%</div>
+                            <div class="intel-footer-text" id="sdr-pitch-details">0 Fechados / 0 Pitches</div>
+                        </div>
+
+                        <div class="parhub-card intelligence-card">
+                            <div class="intel-header">
+                                <i class="fa-solid fa-user-check"></i>
+                                <div>
+                                    <h4>Presença de Decisores</h4>
+                                    <span>Qualidade do agendamento</span>
+                                </div>
+                            </div>
+                            <div class="intel-big-num" id="sdr-decisor-rate">0%</div>
+                            <div class="intel-footer-text" id="sdr-decisor-details">0 Presentes / 0 Totais</div>
+                        </div>
+
+                        <div class="parhub-card intelligence-card">
+                            <div class="intel-header">
+                                <i class="fa-solid fa-network-wired"></i>
+                                <div>
+                                    <h4>Conversão por Canal</h4>
+                                    <span>Yara vs CRM</span>
+                                </div>
+                            </div>
+                            <div class="channel-list-wrapper">
+                                <div class="channel-item">
+                                    <span class="ch-name">I.A Yara</span>
+                                    <span class="ch-pct color-neon" id="channel-yara-rate">0%</span>
+                                </div>
+                                <div class="channel-item">
+                                    <span class="ch-name">CRM Tradicional</span>
+                                    <span class="ch-pct color-neon" id="channel-crm-rate">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="parhub-card ranking-card">
+                        <div class="ranking-header">
+                            <h4><i class="fa-solid fa-triangle-exclamation"></i> Histograma de Perdas e Objeções</h4>
+                        </div>
+                        <div class="ranking-body" id="loss-reasons-container">
+                            <p class="text-muted">Nenhum lead perdido encontrado para os filtros selecionados.</p>
+                        </div>
+                    </div>
+
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <div id="notes-modal" class="parhub-modal">
+        <div class="modal-box">
+            <div class="modal-box-header">
+                <h3><i class="fa-solid fa-paragraph"></i> Notas Estratégicas da Call</h3>
+                <button class="modal-close-icon" onclick="closeNotesModal()">&times;</button>
+            </div>
+            <div class="modal-box-body">
+                <p class="lead-context-display">Lead: <span id="modal-lead-name" class="color-neon">-</span></p>
+                <textarea id="lead-notes-area" placeholder="Escreva as dores latentes, gatilhos mentais mapeados e objeções do lead..."></textarea>
+            </div>
+            <div class="modal-box-footer">
+                <button class="btn-cancel" onclick="closeNotesModal()">Voltar</button>
+                <button class="btn-neon" id="save-notes-btn">Salvar Alterações</button>
             </div>
         </div>
-    </nav>
+    </div>
 
-    <main class="max-w-7xl mx-auto p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        <section id="cardForm" class="bg-[#161925] p-6 rounded-xl border border-[#23283d] shadow-2xl lg:col-span-1 h-fit transition-colors duration-300">
-            <h2 id="textoNovaCall" class="text-sm font-bold uppercase tracking-wider mb-6 border-b border-[#23283d] pb-2 text-[#00f0ff]">Nova Chamada (Call)</h2>
-            <form id="callForm" class="space-y-4">
-                <div>
-                    <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1 tracking-wider">Nome do Lead *</label>
-                    <input type="text" id="nome_lead" required class="w-full bg-[#0f111a] input-field border border-[#23283d] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00f0ff] transition">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1 tracking-wider">Nome da Empresa *</label>
-                    <input type="text" id="nome_empresa" required class="w-full bg-[#0f111a] input-field border border-[#23283d] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00f0ff] transition">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1 tracking-wider">Faturamento Mensal (Opcional)</label>
-                    <input type="number" id="faturamento" class="w-full bg-[#0f111a] input-field border border-[#23283d] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00f0ff] transition" placeholder="R$">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1 tracking-wider">Origem do Lead (SDR) *</label>
-                    <select id="origem_sdr" required class="w-full bg-[#0f111a] input-field border border-[#23283d] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00f0ff] transition">
-                        <option value="I.A Yara">I.A Yara</option>
-                        <option value="CRM">CRM</option>
-                    </select>
-                </div>
-                <div id="boxDecisor" class="flex items-center space-x-3 bg-[#0f111a] p-3 rounded border border-[#23283d]">
-                    <input type="checkbox" id="decisor_presente" class="w-4 h-4 accent-[#00f0ff]">
-                    <label for="decisor_presente" class="text-[10px] font-bold uppercase text-gray-300 tracking-wider">Decisor presente na mesa?</label>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1 tracking-wider">Status do Diagnóstico *</label>
-                    <select id="status_diagnostico" required class="w-full bg-[#0f111a] input-field border border-[#23283d] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00f0ff] transition">
-                        <option value="Aprovado">✅ Aprovado para Pitch</option>
-                        <option value="Reprovado">❌ Reprovado no Diagnóstico</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1 tracking-wider">Nota Comprometimento Pitch 01 (0-10) *</label>
-                    <input type="number" id="nota_pitch_01" min="0" max="10" required class="w-full bg-[#0f111a] input-field border border-[#23283d] rounded px-3 py-2 text-sm font-bold text-[#00f0ff] focus:outline-none focus:border-[#00f0ff] transition">
-                </div>
-
-                <div id="camposAvancados" class="space-y-4">
-                    <div>
-                        <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1 tracking-wider">Fase Máxima Atingida *</label>
-                        <select id="fase_maxima" class="w-full bg-[#0f111a] input-field border border-[#23283d] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00f0ff] transition">
-                            <option value="Diagnóstico">Diagnóstico</option>
-                            <option value="Pitch 01">Pitch 01</option>
-                            <option value="Proposta de Preço">Proposta de Preço</option>
-                            <option value="Fechamento">Fechamento</option>
+    <div id="lead-form-modal" class="parhub-modal">
+        <div class="modal-box large-box">
+            <div class="modal-box-header">
+                <h3 id="form-modal-title"><i class="fa-solid fa-sliders"></i> Atualizar Dados da Linha</h3>
+                <button class="modal-close-icon" onclick="closeLeadModal()">&times;</button>
+            </div>
+            <form id="lead-form" onsubmit="handleLeadFormSubmit(event)">
+                <input type="hidden" id="form-lead-id">
+                <div class="parhub-form-grid">
+                    <div class="input-container">
+                        <label>Nome do Lead *</label>
+                        <input type="text" id="form-nome" required>
+                    </div>
+                    <div class="input-container">
+                        <label>Nome da Empresa</label>
+                        <input type="text" id="form-empresa">
+                    </div>
+                    <div class="input-container">
+                        <label>Faturamento Mensal</label>
+                        <input type="text" id="form-faturamento" placeholder="Ex: R$ 100k">
+                    </div>
+                    <div class="input-container">
+                        <label>Nome do SDR</label>
+                        <input type="text" id="form-sdr">
+                    </div>
+                    <div class="input-container">
+                        <label>Dia e Horário da Reunião</label>
+                        <input type="datetime-local" id="form-data-reuniao">
+                    </div>
+                    <div class="input-container">
+                        <label>Origem do Lead</label>
+                        <select id="form-origem">
+                            <option value="I.A Yara">I.A Yara</option>
+                            <option value="CRM">CRM</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1 tracking-wider">Desfecho da Call *</label>
-                        <select id="resultado" class="w-full bg-[#0f111a] input-field border border-[#23283d] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00f0ff] transition">
-                            <option value="Fechado">Fechado (Pix/Cartão)</option>
+                    <div class="input-container">
+                        <label>Decisor Presente?</label>
+                        <select id="form-decisor">
+                            <option value="Sim">Sim</option>
+                            <option value="Não">Não</option>
+                        </select>
+                    </div>
+                    <div class="input-container">
+                        <label>Status do Diagnóstico</label>
+                        <select id="form-status-diag">
+                            <option value="Aprovado para Pitch">Aprovado para Pitch</option>
+                            <option value="Reprovado">Reprovado</option>
+                        </select>
+                    </div>
+                    <div class="input-container">
+                        <label>Deu Pitch?</label>
+                        <select id="form-pitch">
+                            <option value="Sim">Sim</option>
+                            <option value="Não">Não</option>
+                        </select>
+                    </div>
+                    <div class="input-container">
+                        <label>Reagendado para 2ª Call?</label>
+                        <select id="form-reagendado">
+                            <option value="Não">Não</option>
+                            <option value="Sim">Sim</option>
+                        </select>
+                    </div>
+                    <div class="input-container">
+                        <label>Desfecho Comercial</label>
+                        <select id="form-desfecho" onchange="toggleLossReasonField()">
+                            <option value="Em Aberto">Em Aberto</option>
+                            <option value="Fechado">Fechado</option>
                             <option value="Downsell">Downsell</option>
                             <option value="Perdido">Perdido</option>
                         </select>
                     </div>
-                    <div id="campoValor">
-                        <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1 tracking-wider">Valor do Contrato Fechado *</label>
-                        <input type="number" id="valor_contrato" class="w-full bg-[#0f111a] input-field border border-[#23283d] rounded px-3 py-2 text-sm text-emerald-400 font-bold focus:outline-none focus:border-emerald-500 transition" value="0">
+                    <div class="input-container">
+                        <label>Valor do Contrato (R$)</label>
+                        <input type="number" id="form-valor" step="0.01" value="0.00">
+                    </div>
+                    <div class="input-container">
+                        <label>Data de Pagamento Combinada</label>
+                        <input type="date" id="form-data-pagamento">
+                    </div>
+                    <div class="input-container dynamic-group" id="loss-reason-group" style="display:none;">
+                        <label>Motivo da Perda (Objeção)</label>
+                        <select id="form-motivo-perda">
+                            <option value="">Selecione o motivo...</option>
+                            <option value="Sem Caixa">Sem Caixa / Preço</option>
+                            <option value="Sem Decisor">Sem Decisor na Call</option>
+                            <option value="Não tem o Perfil">Não tem o Perfil / Lead Frio</option>
+                            <option value="Pensar / Sumiu">Pediu para pensar / Sumiu</option>
+                            <option value="Outro">Outro motivo</option>
+                        </select>
                     </div>
                 </div>
-
-                <div id="campoPerda" class="hidden">
-                    <label class="block text-[10px] font-bold uppercase text-amber-500 mb-1 tracking-wider">Motivo Real da Perda *</label>
-                    <select id="motivo_perda" class="w-full bg-[#0f111a] input-field border border-amber-600/40 rounded px-3 py-2 text-sm text-amber-400 focus:outline-none">
-                        <option value="01. Sem Caixa / Sem Fôlego Financeiro">01. Sem Caixa / Sem Fôlego Financeiro</option>
-                        <option value="02. Sem Margem de Lucro">02. Sem Margem de Lucro</option>
-                        <option value="03. Sem Decisor na Mesa">03. Sem Decisor na Mesa</option>
-                        <option value="04. Objeção de Cônjuge / Esposa">04. Objeção de Cônjuge / Esposa</option>
-                        <option value="05. Trauma de Passado / Medo">05. Trauma de Passado / Medo</option>
-                        <option value="06. Nível de Consciência Baixo">06. Nível de Consciência Baixo</option>
-                        <option value="07. Buscando Apenas Preço / Leilão">07. Buscando Apenas Preço / Leilão</option>
-                    </select>
+                <div class="modal-box-footer" style="margin-top:20px; padding-top:15px;">
+                    <button type="button" class="btn-cancel" onclick="closeLeadModal()">Descartar</button>
+                    <button type="submit" class="btn-neon">Confirmar Entrada</button>
                 </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1 tracking-wider">Observações da Call</label>
-                    <textarea id="observacoes" rows="3" class="w-full bg-[#0f111a] input-field border border-[#23283d] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00f0ff] transition" placeholder="Gatilhos, dores mapeadas..."></textarea>
-                </div>
-
-                <button type="submit" class="w-full bg-[#10b981] hover:bg-[#34d399] text-[#0f111a] font-bold py-2.5 rounded shadow-[0_0_15px_rgba(16,185,129,0.2)] transition uppercase text-xs tracking-wider cursor-pointer">💾 Registrar Lançamento</button>
             </form>
-        </section>
-
-        <section class="lg:col-span-2 space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="card-metric bg-[#161925] p-4 rounded-xl border border-[#23283d] shadow flex flex-col justify-between transition-colors duration-300">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Faturamento Líquido</span>
-                    <span id="cardFaturamento" class="text-2xl font-bold text-emerald-400 mt-2">R$ 0,00</span>
-                </div>
-                <div class="card-metric bg-[#161925] p-4 rounded-xl border border-[#23283d] shadow flex flex-col justify-between transition-colors duration-300">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Conversão Faixa Preta</span>
-                    <span id="cardConversao" class="text-2xl font-bold text-[#00f0ff] mt-2">0%</span>
-                    <span class="text-[9px] text-gray-500 mt-1">(Fechados / Leads Aprovados)</span>
-                </div>
-                <div class="card-metric bg-[#161925] p-4 rounded-xl border border-[#23283d] shadow flex flex-col justify-between transition-colors duration-300">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Aproveitamento SDR</span>
-                    <span id="cardSdr" class="text-2xl font-bold text-blue-500 mt-2">0%</span>
-                    <span class="text-[9px] text-gray-500 mt-1">(Aprovados / Total Bruto)</span>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="card-metric bg-[#161925] p-5 rounded-xl border border-[#23283d] shadow transition-colors duration-300">
-                    <h3 class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-4 text-center">Volume e Fechamento por SDR</h3>
-                    <div class="h-48 flex items-center justify-center"><canvas id="graficoSdr"></canvas></div>
-                </div>
-                <div class="card-metric bg-[#161925] p-5 rounded-xl border border-[#23283d] shadow transition-colors duration-300">
-                    <h3 class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-4 text-center">Ranking de Motivos de Perda</h3>
-                    <div class="h-48 flex items-center justify-center"><canvas id="graficoPerdas"></canvas></div>
-                </div>
-            </div>
-
-            <div id="cardTabela" class="bg-[#161925] rounded-xl border border-[#23283d] shadow overflow-hidden transition-colors duration-300">
-                <div id="topoTabela" class="p-4 bg-[#1b1f2e] border-b border-[#23283d] transition-colors duration-300">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-[#00f0ff]">Histórico de Calls Realizadas</h3>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs border-collapse">
-                        <thead>
-                            <tr id="headerTabela" class="bg-[#0f111a] text-gray-400 border-b border-[#23283d] uppercase tracking-wider font-bold text-[10px]">
-                                <th class="p-3">Data</th>
-                                <th class="p-3">Lead / Empresa</th>
-                                <th class="p-3">SDR</th>
-                                <th class="p-3">Diagnóstico</th>
-                                <th class="p-3">Nota P01</th>
-                                <th class="p-3">Resultado</th>
-                                <th class="p-3">Faturamento</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaCalls" class="divide-y divide-[#23283d]"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-    </main>
+        </div>
+    </div>
 
     <script type="module" src="app.js"></script>
+    <script>
+        // Chaves de Abas Integradas com os títulos dinâmicos
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-content'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabName).classList.add('active-content');
+            document.getElementById('btn-tab-' + tabName).classList.add('active');
+            
+            const titleEl = document.getElementById('current-page-title');
+            const subEl = document.querySelector('.page-subtitle');
+            
+            if(tabName === 'mesa') {
+                titleEl.innerText = "Mesa de Operações";
+                subEl.innerText = "Visão geral da sua mesa de vendas high-ticket";
+            } else {
+                titleEl.innerText = "Overview & Analytics";
+                subEl.innerText = "Métricas completas e rastreamento faixa preta de conversão";
+                window.dispatchEvent(new CustomEvent('refresh-metrics'));
+            }
+        }
+
+        // Sistema Real-time de Alternância de Tema Claro / Escuro
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        }
+    </script>
 </body>
 </html>
