@@ -5,34 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reuniões Agência Rei — Dashboard Especialista</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="parhub-dashboard-layout">
         
-        <aside class="sidebar">
-    
+        <aside class="parhub-sidebar">
+            
             <div class="sidebar-logo-container">
-                <img src="logo.png" alt="Logo Sistema" class="sidebar-logo">
+                <img src="logo.png" alt="Agência Rei" class="sidebar-logo">
             </div>
 
-            <nav class="menu-section">
+            <nav class="sidebar-menu">
                 <a href="#" class="menu-item active" onclick="switchTab(event, 'mesa-operacoes')">
-                    <i class="fa-solid fa-table-cells-large"></i> Mesa de Operações
+                    <i class="fa-solid fa-square-kanban"></i> Mesa de Operações
                 </a>
                 <a href="#" class="menu-item" onclick="switchTab(event, 'overview-insights')">
                     <i class="fa-solid fa-chart-pie"></i> Overview & Insights
                 </a>
             </nav>
 
-            <div class="sidebar-actions">
+            <div class="sidebar-actions-zone">
                 <button class="btn-sync-calendar" onclick="window.handleAuthClick()">
-                    <i class="fa-solid fa-calendar-days"></i> Sincronizar Agenda
+                    <i class="fa-brands fa-google"></i> Sincronizar Agenda
                 </button>
             </div>
 
+            <div class="sidebar-footer">
+                <div class="user-avatar-wrapper">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <div>
+                    <p class="user-name">Matheus Silva</p>
+                    <span class="user-role"><i class="fa-solid fa-circle-check color-success"></i> High Ticket Closer</span>
+                </div>
+            </div>
         </aside>
 
         <main class="parhub-main-content">
@@ -43,9 +52,6 @@
                     <p class="text-muted sub-context">Controle de tração, fechamentos e auditoria de calls em tempo real.</p>
                 </div>
                 <div class="header-actions-row">
-                    <button class="btn-secondary" onclick="window.handleAuthClick()" style="gap: 8px;">
-                        <i class="fa-brands fa-google" style="color: #4285F4;"></i> Sincronizar Google Calendar
-                    </button>
                     <button class="btn-primary" onclick="window.openNewLeadModal()">
                         <i class="fa-solid fa-plus"></i> Inserir Lead na Mesa
                     </button>
@@ -89,7 +95,7 @@
                         <i class="fa-solid fa-filter color-neon" style="font-size:18px;"></i>
                         <div>
                             <h4 style="margin:0; font-size:15px;">Inteligência Competitiva</h4>
-                            <p class="text-muted" style="margin:0; font-size:12px;">Selecione um SDR específico para analisar as taxas de conversão isoladas</p>
+                            <p class="text-muted" style="margin:0; font-size:12px;">Selecione um SDR específico para analisar as taxas</p>
                         </div>
                     </div>
                     <select id="filter-sdr-select" onchange="window.calculateAdvancedMetrics()" class="premium-select-filter">
@@ -129,7 +135,7 @@
                 <div class="analytics-row-grid">
                     <div class="parhub-card intelligence-card">
                         <div class="intel-header">
-                            <i class="fa-solid fa-bullseye-arrow"></i>
+                            <i class="fa-solid fa-bullseye"></i>
                             <div>
                                 <h4>Efetividade de Pitch</h4>
                                 <span>Conversão de quem ouviu a oferta</span>
@@ -137,7 +143,7 @@
                         </div>
                         <div class="intel-body-large">
                             <h1 id="sdr-pitch-rate">0%</h1>
-                            <p id="sdr-pitch-details" class="text-muted">0 Fechados / 0 Pitches Realizados</p>
+                            <p id="sdr-pitch-details" class="text-muted">0 Fechados / 0 Pitches</p>
                         </div>
                     </div>
 
@@ -146,7 +152,7 @@
                             <i class="fa-solid fa-user-check"></i>
                             <div>
                                 <h4>Presença de Decisores</h4>
-                                <span>Filtro e assertividade do agendamento</span>
+                                <span>Assertividade do agendamento</span>
                             </div>
                         </div>
                         <div class="intel-body-large">
@@ -160,26 +166,14 @@
                             <i class="fa-solid fa-filter"></i>
                             <div>
                                 <h4>Raio-X do Funil</h4>
-                                <span>Volume e Qualificação de Reuniões</span>
+                                <span>Qualificação de Reuniões</span>
                             </div>
                         </div>
                         <div class="channel-list-wrapper" style="margin-top: 15px;">
-                            <div class="channel-item">
-                                <span>Total Agendadas:</span>
-                                <strong id="funnel-total">0</strong>
-                            </div>
-                            <div class="channel-item">
-                                <span>No-Shows (Faltas):</span>
-                                <strong style="color: var(--danger-clean);" id="funnel-noshow">0</strong>
-                            </div>
-                            <div class="channel-item">
-                                <span>Qualificadas (Pitch):</span>
-                                <strong style="color: var(--success-clean);" id="funnel-qualificados">0</strong>
-                            </div>
-                            <div class="channel-item">
-                                <span>Não Qualificadas:</span>
-                                <strong style="color: var(--warning-clean);" id="funnel-reprovados">0</strong>
-                            </div>
+                            <div class="channel-item"><span>Total Agendadas:</span><strong id="funnel-total">0</strong></div>
+                            <div class="channel-item"><span>No-Shows:</span><strong style="color: var(--danger-clean);" id="funnel-noshow">0</strong></div>
+                            <div class="channel-item"><span>Qualificadas:</span><strong style="color: var(--success-clean);" id="funnel-qualificados">0</strong></div>
+                            <div class="channel-item"><span>Não Qualificadas:</span><strong style="color: var(--warning-clean);" id="funnel-reprovados">0</strong></div>
                         </div>
                     </div>
                 </div>
@@ -187,25 +181,19 @@
                 <div class="analytics-row-grid" style="margin-top: 24px;">
                     <div class="parhub-card intelligence-card">
                         <div class="intel-header">
-                            <i class="fa-solid fa-circle-nodes"></i>
+                            <i class="fa-solid fa-chart-line"></i>
                             <div>
                                 <h4>Canais de Conversão</h4>
-                                <span>Taxa de fechamento por origem de lead</span>
+                                <span>Taxa por origem</span>
                             </div>
                         </div>
                         <div class="channel-list-wrapper">
                             <div class="channel-item">
-                                <div style="display:flex; align-items:center; gap:8px;">
-                                    <span class="dot-indicator bg-blue"></span>
-                                    <span>I.A Yara</span>
-                                </div>
+                                <div style="display:flex; align-items:center; gap:8px;"><span class="dot-indicator bg-blue"></span><span>I.A Yara</span></div>
                                 <strong id="channel-yara-rate">0%</strong>
                             </div>
                             <div class="channel-item">
-                                <div style="display:flex; align-items:center; gap:8px;">
-                                    <span class="dot-indicator bg-purple"></span>
-                                    <span>CRM Próprio</span>
-                                </div>
+                                <div style="display:flex; align-items:center; gap:8px;"><span class="dot-indicator bg-purple"></span><span>CRM Próprio</span></div>
                                 <strong id="channel-crm-rate">0%</strong>
                             </div>
                         </div>
@@ -213,14 +201,13 @@
 
                     <div class="parhub-card intelligence-card" style="grid-column: span 2;">
                         <div class="intel-header">
-                            <i class="fa-solid fa-chart-simple-horizontal"></i>
+                            <i class="fa-solid fa-chart-bar"></i>
                             <div>
                                 <h4>Mapa de Objeções & Perdas</h4>
-                                <span>Entenda os principais gargalos que estão travando as vendas</span>
+                                <span>Principais gargalos travando as vendas</span>
                             </div>
                         </div>
-                        <div class="rk-histogram-container" id="loss-reasons-container">
-                            </div>
+                        <div class="rk-histogram-container" id="loss-reasons-container"></div>
                     </div>
                 </div>
             </section>
@@ -358,7 +345,7 @@
                 <button class="modal-close-btn" onclick="window.closeNotesModal()">&times;</button>
             </div>
             <div style="margin-top:15px;">
-                <textarea id="lead-notes-area" rows="8" class="premium-textarea" placeholder="Cole aqui a transcrição da call ou anote as principais objeções, dores do negócio, metas e próximos passos combinados..."></textarea>
+                <textarea id="lead-notes-area" rows="8" class="premium-textarea" placeholder="Cole aqui a transcrição da call..."></textarea>
             </div>
             <div class="modal-box-actions" style="margin-top:15px;">
                 <button class="btn-secondary" onclick="window.closeNotesModal()">Fechar</button>
@@ -372,7 +359,7 @@
             <div class="modal-box-header">
                 <div>
                     <h3 style="margin:0;"><i class="fa-brands fa-google color-neon"></i> Reuniões da Agenda Google</h3>
-                    <span class="text-muted" style="font-size:12px;">Selecione os compromissos da Agência Rei para importar sem duplicar</span>
+                    <span class="text-muted" style="font-size:12px;">Selecione os compromissos para importar</span>
                 </div>
                 <button class="modal-close-btn" onclick="document.getElementById('calendar-modal').style.display='none'">&times;</button>
             </div>
@@ -384,10 +371,9 @@
                             <th>Data e Hora</th>
                             <th style="text-align: right;">Ação</th>
                         </tr>
-                    </table>
-                    <div id="calendar-events-list">
-                        </div>
-                </div>
+                    </thead>
+                </table>
+                <div id="calendar-events-list"></div>
             </div>
         </div>
     </div>
@@ -397,16 +383,13 @@
         function switchTab(event, tabId) {
             event.preventDefault();
             
-            // Remove estados ativos dos links da barra lateral
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
 
-            // Troca de exibição de blocos
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-content'));
             const targetContent = document.getElementById(tabId);
             if(targetContent) targetContent.classList.add('active-content');
 
-            // Ajusta o texto do Header dinamicamente sem gerar erros
             const titleContext = document.getElementById("page-title-context");
             const subContext = document.querySelector(".sub-context");
             
@@ -420,7 +403,6 @@
             }
         }
     </script>
-
     <script async defer src="https://apis.google.com/js/api.js"></script>
     <script async defer src="https://accounts.google.com/gsi/client"></script>
 </body>

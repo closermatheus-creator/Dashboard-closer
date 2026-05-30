@@ -26,24 +26,19 @@ const firebaseConfig = {
     appId: "1:366563664458:web:6e36507e266a720dd1bcb3"
 };
 
-// Inicialização do Firebase e Firestore
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const leadsCollection = collection(db, "leads");
 
-// Variável Global para Armazenar os Leads em Memória Real-time
 let localLeadsCache = [];
 
 // ==========================================================================
-// CONFIGURAÇÕES DA INTEGRAÇÃO GOOGLE CALENDAR (TOKEN REAL FIXADO)
+// CONFIGURAÇÕES DA INTEGRAÇÃO GOOGLE CALENDAR
 // ==========================================================================
 const CLIENT_ID = '258420488272-c2emtfbpljfq51kvrlbna83gunrsvsas.apps.googleusercontent.com'; 
 const SCOPES = 'https://www.googleapis.com/auth/calendar.events.readonly';
 let tokenClient;
 
-// ==========================================================================
-// ROTINAS DE INICIALIZAÇÃO E ESCUTA EM TEMPO REAL
-// ==========================================================================
 document.addEventListener("DOMContentLoaded", () => {
     initRealTimeListener();
     setupGlobalEvents();
@@ -58,9 +53,7 @@ function setupGlobalEvents() {
     });
 
     const saveNotesBtn = document.getElementById("save-notes-btn");
-    if(saveNotesBtn) {
-        saveNotesBtn.onclick = saveQuickNotes;
-    }
+    if(saveNotesBtn) saveNotesBtn.onclick = saveQuickNotes;
 }
 
 function initRealTimeListener() {
@@ -75,13 +68,11 @@ function initRealTimeListener() {
         renderLeadsTable();
         window.populateSdrFilterOptions();
         window.calculateAdvancedMetrics();
-    }, (error) => {
-        console.error("Erro na escuta em tempo real do Firebase: ", error);
-    });
+    }, (error) => console.error("Erro Firebase: ", error));
 }
 
 // ==========================================================================
-// RENDERIZAÇÃO DA PÁGINA 1: MESA DE OPERAÇÕES
+// RENDERIZAÇÃO DA TABELA (COM CLIQUE NO NOME DO LEAD)
 // ==========================================================================
 function renderLeadsTable() {
     const container = document.getElementById("leads-container");
@@ -91,7 +82,7 @@ function renderLeadsTable() {
     if (totalCounter) totalCounter.innerText = `${localLeadsCache.length} Lead${localLeadsCache.length !== 1 ? 's' : ''}`;
 
     if (localLeadsCache.length === 0) {
-        container.innerHTML = `<tr><td colspan="9" class="text-muted" style="text-align: center; padding: 30px;">Nenhum lead na mesa de operações até o momento.</td></tr>`;
+        container.innerHTML = `<tr><td colspan="9" class="text-muted" style="text-align: center; padding: 30px;">Nenhum lead na mesa.</td></tr>`;
         return;
     }
 
@@ -120,7 +111,6 @@ function renderLeadsTable() {
         if (lead.statusDiag === "Aprovado para Pitch") badgeDiag = "p-badge-success";
         if (lead.statusDiag === "No-Show") badgeDiag = "p-badge-danger";
 
-        // Adicionado cursor pointer e o gatilho window.editLead(id) direto na TD do Lead
         tr.innerHTML = `
             <td onclick="window.editLead('${lead.id}')" style="cursor: pointer;" title="Clique para editar este lead">
                 <span class="lead-main-name" style="text-decoration: underline; text-decoration-color: transparent; transition: text-decoration-color 0.2s;">${lead.nome}</span>
@@ -168,7 +158,7 @@ function renderLeadsTable() {
 }
 
 // ==========================================================================
-// CONTROLE DOS MODAIS E FLUXOS OPERACIONAIS (PÁGINA 1) - ESCOPO GLOBAL
+// CONTROLES DE MODAIS E LEADS
 // ==========================================================================
 window.openNewLeadModal = function() {
     const form = document.getElementById("lead-form");
@@ -187,18 +177,13 @@ window.toggleLossReasonField = function() {
     const desfechoValue = document.getElementById("form-desfecho").value;
     const lossGroup = document.getElementById("loss-reason-group");
     if(lossGroup) {
-        if(desfechoValue === "Perdido") {
-            lossGroup.style.display = "flex";
-        } else {
-            lossGroup.style.display = "none";
-            document.getElementById("form-motivo-perda").value = "";
-        }
+        if(desfechoValue === "Perdido") lossGroup.style.display = "flex";
+        else { lossGroup.style.display = "none"; document.getElementById("form-motivo-perda").value = ""; }
     }
 };
 
 window.handleLeadFormSubmit = async function(e) {
     if(e) e.preventDefault();
-    
     const id = document.getElementById("form-lead-id").value;
     const leadData = {
         nome: document.getElementById("form-nome").value,
@@ -219,17 +204,10 @@ window.handleLeadFormSubmit = async function(e) {
     };
 
     try {
-        if (id) {
-            const docRef = doc(db, "leads", id);
-            await updateDoc(docRef, leadData);
-        } else {
-            await addDoc(leadsCollection, leadData);
-        }
+        if (id) await updateDoc(doc(db, "leads", id), leadData);
+        else await addDoc(leadsCollection, leadData);
         window.closeLeadModal();
-    } catch (err) {
-        console.error("Erro ao salvar documento: ", err);
-        alert("Falha ao salvar dados no Firebase.");
-    }
+    } catch (err) { alert("Falha ao salvar dados no Firebase."); }
 };
 
 window.editLead = function(id) {
@@ -252,30 +230,21 @@ window.editLead = function(id) {
     document.getElementById("form-data-pagamento").value = lead.dataPagamento || "";
     document.getElementById("form-motivo-perda").value = lead.motivoPerda || "";
 
-    document.getElementById("form-modal-title").innerHTML = `<i class="fa-solid fa-sliders"></i> Atualizar Dados da Linha`;
+    document.getElementById("form-modal-title").innerHTML = `<i class="fa-solid fa-sliders"></i> Atualizar Dados`;
     window.toggleLossReasonField();
     document.getElementById("lead-form-modal").style.display = "flex";
 };
 
 window.deleteLead = async function(id) {
-    if (confirm("Tem certeza que deseja remover este lead da mesa de operações?")) {
-        try {
-            await deleteDoc(doc(db, "leads", id));
-        } catch (err) {
-            console.error("Erro ao deletar lead: ", err);
-        }
+    if (confirm("Tem certeza que deseja remover este lead?")) {
+        await deleteDoc(doc(db, "leads", id));
     }
 };
 
-// ==========================================================================
-// CONTROLE DO POP-UP LEVE: HISTÓRICO E NOTAS RÁPIDAS
-// ==========================================================================
 let currentActiveNotesLeadId = null;
-
 window.openNotesModal = function(id) {
     const lead = localLeadsCache.find(l => l.id === id);
     if (!lead) return;
-
     currentActiveNotesLeadId = id;
     document.getElementById("modal-lead-name").innerText = lead.nome;
     document.getElementById("lead-notes-area").value = lead.observacoes || "";
@@ -291,70 +260,40 @@ window.closeNotesModal = function() {
 async function saveQuickNotes() {
     if (!currentActiveNotesLeadId) return;
     const textValue = document.getElementById("lead-notes-area").value;
-    try {
-        const docRef = doc(db, "leads", currentActiveNotesLeadId);
-        await updateDoc(docRef, { observacoes: textValue });
-        window.closeNotesModal();
-    } catch(err) {
-        console.error("Erro ao salvar observação: ", err);
-    }
+    await updateDoc(doc(db, "leads", currentActiveNotesLeadId), { observacoes: textValue });
+    window.closeNotesModal();
 }
 
 // ==========================================================================
-// RENDIMENTO E MÁQUINA DE INSIGHTS FAIXA PRETA (PÁGINA 2)
+// MÁQUINA DE INSIGHTS E FILTROS
 // ==========================================================================
 window.populateSdrFilterOptions = function() {
     const select = document.getElementById("filter-sdr-select");
     if (!select) return;
-
     const currentValue = select.value;
     const sdrs = [...new Set(localLeadsCache.map(l => l.sdr).filter(name => name && name.trim() !== ""))];
-    
     select.innerHTML = `<option value="todos">Todos os SDRs (Visão Geral)</option>`;
-    sdrs.forEach(sdrName => {
-        select.innerHTML += `<option value="${sdrName}">${sdrName}</option>`;
-    });
-
-    if (currentValue && sdrs.includes(currentValue)) {
-        select.value = currentValue;
-    }
+    sdrs.forEach(sdrName => select.innerHTML += `<option value="${sdrName}">${sdrName}</option>`);
+    if (currentValue && sdrs.includes(currentValue)) select.value = currentValue;
 };
 
 window.calculateAdvancedMetrics = function() {
     const selectedSdr = document.getElementById("filter-sdr-select")?.value || "todos";
     const agora = new Date();
     
-    const inicioSemana = new Date(agora);
-    inicioSemana.setDate(agora.getDate() - agora.getDay());
-    inicioSemana.setHours(0,0,0,0);
-
-    const inicioQuinzena = new Date(agora);
-    inicioQuinzena.setDate(agora.getDate() - 15);
-    inicioQuinzena.setHours(0,0,0,0);
-
+    const inicioSemana = new Date(agora); inicioSemana.setDate(agora.getDate() - agora.getDay()); inicioSemana.setHours(0,0,0,0);
+    const inicioQuinzena = new Date(agora); inicioQuinzena.setDate(agora.getDate() - 15); inicioQuinzena.setHours(0,0,0,0);
     const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
 
     let faturamentoSemana = 0, totalLeadsSemana = 0, fechadosSemana = 0;
     let faturamentoQuinzena = 0, totalLeadsQuinzena = 0, fechadosQuinzena = 0;
     let faturamentoMes = 0, totalLeadsMes = 0, fechadosMes = 0;
 
-    let totalPitches = 0, fechadosPops = 0;
-    let totalDecisoresValidados = 0, totalLeadsComDiag = 0;
-    let yaraTotal = 0, yaraFechados = 0;
-    let crmTotal = 0, crmFechados = 0;
+    let totalPitches = 0, fechadosPops = 0, totalDecisoresValidados = 0, totalLeadsComDiag = 0;
+    let yaraTotal = 0, yaraFechados = 0, crmTotal = 0, crmFechados = 0;
+    let funnelTotal = 0, funnelNoShow = 0, funnelQualificados = 0, funnelReprovados = 0;
 
-    let funnelTotal = 0;
-    let funnelNoShow = 0;
-    let funnelQualificados = 0;
-    let funnelReprovados = 0;
-
-    const contagemObjecoes = {
-        "Sem Caixa": 0,
-        "Sem Decisor": 0,
-        "Não tem o Perfil": 0,
-        "Pensar / Sumiu": 0,
-        "Outro": 0
-    };
+    const contagemObjecoes = { "Sem Caixa": 0, "Sem Decisor": 0, "Não tem o Perfil": 0, "Pensar / Sumiu": 0, "Outro": 0 };
 
     localLeadsCache.forEach(lead => {
         if (!lead.dataReuniao) return;
@@ -362,82 +301,39 @@ window.calculateAdvancedMetrics = function() {
         const valor = parseFloat(lead.valor || 0);
         const passouFiltroSdr = (selectedSdr === "todos" || lead.sdr === selectedSdr);
 
-        if (dataReuniao >= inicioSemana) {
-            totalLeadsSemana++;
-            if (lead.desfecho === "Fechado" || lead.desfecho === "Downsell") {
-                faturamentoSemana += valor;
-                fechadosSemana++;
-            }
-        }
-        if (dataReuniao >= inicioQuinzena) {
-            totalLeadsQuinzena++;
-            if (lead.desfecho === "Fechado" || lead.desfecho === "Downsell") {
-                faturamentoQuinzena += valor;
-                fechadosQuinzena++;
-            }
-        }
-        if (dataReuniao >= inicioMes) {
-            totalLeadsMes++;
-            if (lead.desfecho === "Fechado" || lead.desfecho === "Downsell") {
-                faturamentoMes += valor;
-                fechadosMes++;
-            }
-        }
+        if (dataReuniao >= inicioSemana) { totalLeadsSemana++; if (lead.desfecho === "Fechado" || lead.desfecho === "Downsell") { faturamentoSemana += valor; fechadosSemana++; } }
+        if (dataReuniao >= inicioQuinzena) { totalLeadsQuinzena++; if (lead.desfecho === "Fechado" || lead.desfecho === "Downsell") { faturamentoQuinzena += valor; fechadosQuinzena++; } }
+        if (dataReuniao >= inicioMes) { totalLeadsMes++; if (lead.desfecho === "Fechado" || lead.desfecho === "Downsell") { faturamentoMes += valor; fechadosMes++; } }
 
         if (passouFiltroSdr) {
             funnelTotal++;
-            if (lead.statusDiag === "No-Show") {
-                funnelNoShow++;
-            } else if (lead.statusDiag === "Aprovado para Pitch") {
-                funnelQualificados++;
-            } else if (lead.statusDiag === "Reprovado") {
-                funnelReprovados++;
-            }
+            if (lead.statusDiag === "No-Show") funnelNoShow++;
+            else if (lead.statusDiag === "Aprovado para Pitch") funnelQualificados++;
+            else if (lead.statusDiag === "Reprovado") funnelReprovados++;
 
-            if (lead.pitch === "Sim") {
-                totalPitches++;
-                if (lead.desfecho === "Fechado" || lead.desfecho === "Downsell") {
-                    fechadosPops++;
-                }
-            }
+            if (lead.pitch === "Sim") { totalPitches++; if (lead.desfecho === "Fechado" || lead.desfecho === "Downsell") fechadosPops++; }
+            if (lead.decisor) { totalLeadsComDiag++; if (lead.decisor === "Sim") totalDecisoresValidados++; }
 
-            if (lead.decisor) {
-                totalLeadsComDiag++;
-                if (lead.decisor === "Sim") totalDecisoresValidados++;
-            }
+            if (lead.origem === "I.A Yara") { yaraTotal++; if (lead.desfecho === "Fechado" || lead.desfecho === "Downsell") yaraFechados++; } 
+            else if (lead.origem === "CRM") { crmTotal++; if (lead.desfecho === "Fechado" || lead.desfecho === "Downsell") crmFechados++; }
 
-            if (lead.origem === "I.A Yara") {
-                yaraTotal++;
-                if (lead.desfecho === "Fechado" || lead.desfecho === "Downsell") yaraFechados++;
-            } else if (lead.origem === "CRM") {
-                crmTotal++;
-                if (lead.desfecho === "Fechado" || lead.desfecho === "Downsell") crmFechados++;
-            }
-
-            if (lead.desfecho === "Perdido" && lead.motivoPerda && contagemObjecoes[lead.motivoPerda] !== undefined) {
-                contagemObjecoes[lead.motivoPerda]++;
-            }
+            if (lead.desfecho === "Perdido" && lead.motivoPerda && contagemObjecoes[lead.motivoPerda] !== undefined) contagemObjecoes[lead.motivoPerda]++;
         }
     });
 
     if (document.getElementById("metrics-week-money")) document.getElementById("metrics-week-money").innerText = faturamentoSemana.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    const txSemana = totalLeadsSemana > 0 ? Math.round((fechadosSemana / totalLeadsSemana) * 100) : 0;
-    if (document.getElementById("metrics-week-conv")) document.getElementById("metrics-week-conv").innerText = `Conversão: ${txSemana}%`;
+    if (document.getElementById("metrics-week-conv")) document.getElementById("metrics-week-conv").innerText = `Conversão: ${totalLeadsSemana > 0 ? Math.round((fechadosSemana / totalLeadsSemana) * 100) : 0}%`;
 
     if (document.getElementById("metrics-fortnight-money")) document.getElementById("metrics-fortnight-money").innerText = faturamentoQuinzena.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    const txQuinzena = totalLeadsQuinzena > 0 ? Math.round((fechadosQuinzena / totalLeadsQuinzena) * 100) : 0;
-    if (document.getElementById("metrics-fortnight-conv")) document.getElementById("metrics-fortnight-conv").innerText = `Conversão: ${txQuinzena}%`;
+    if (document.getElementById("metrics-fortnight-conv")) document.getElementById("metrics-fortnight-conv").innerText = `Conversão: ${totalLeadsQuinzena > 0 ? Math.round((fechadosQuinzena / totalLeadsQuinzena) * 100) : 0}%`;
 
     if (document.getElementById("metrics-month-money")) document.getElementById("metrics-month-money").innerText = faturamentoMes.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    const txMes = totalLeadsMes > 0 ? Math.round((fechadosMes / totalLeadsMes) * 100) : 0;
-    if (document.getElementById("metrics-month-conv")) document.getElementById("metrics-month-conv").innerText = `Conversão: ${txMes}%`;
+    if (document.getElementById("metrics-month-conv")) document.getElementById("metrics-month-conv").innerText = `Conversão: ${totalLeadsMes > 0 ? Math.round((fechadosMes / totalLeadsMes) * 100) : 0}%`;
 
-    const txPitch = totalPitches > 0 ? Math.round((fechadosPops / totalPitches) * 100) : 0;
-    if (document.getElementById("sdr-pitch-rate")) document.getElementById("sdr-pitch-rate").innerText = `${txPitch}%`;
+    if (document.getElementById("sdr-pitch-rate")) document.getElementById("sdr-pitch-rate").innerText = `${totalPitches > 0 ? Math.round((fechadosPops / totalPitches) * 100) : 0}%`;
     if (document.getElementById("sdr-pitch-details")) document.getElementById("sdr-pitch-details").innerText = `${fechadosPops} Fechados / ${totalPitches} Pitches`;
 
-    const txDecisor = totalLeadsComDiag > 0 ? Math.round((totalDecisoresValidados / totalLeadsComDiag) * 100) : 0;
-    if (document.getElementById("sdr-decisor-rate")) document.getElementById("sdr-decisor-rate").innerText = `${txDecisor}%`;
+    if (document.getElementById("sdr-decisor-rate")) document.getElementById("sdr-decisor-rate").innerText = `${totalLeadsComDiag > 0 ? Math.round((totalDecisoresValidados / totalLeadsComDiag) * 100) : 0}%`;
     if (document.getElementById("sdr-decisor-details")) document.getElementById("sdr-decisor-details").innerText = `${totalDecisoresValidados} Presentes / ${totalLeadsComDiag} Reuniões`;
 
     if (document.getElementById("funnel-total")) document.getElementById("funnel-total").innerText = funnelTotal;
@@ -445,10 +341,8 @@ window.calculateAdvancedMetrics = function() {
     if (document.getElementById("funnel-qualificados")) document.getElementById("funnel-qualificados").innerText = funnelQualificados;
     if (document.getElementById("funnel-reprovados")) document.getElementById("funnel-reprovados").innerText = funnelReprovados;
 
-    const txYara = yaraTotal > 0 ? Math.round((yaraFechados / yaraTotal) * 100) : 0;
-    const txCrm = crmTotal > 0 ? Math.round((crmFechados / crmTotal) * 100) : 0;
-    if (document.getElementById("channel-yara-rate")) document.getElementById("channel-yara-rate").innerText = `${txYara}%`;
-    if (document.getElementById("channel-crm-rate")) document.getElementById("channel-crm-rate").innerText = `${txCrm}%`;
+    if (document.getElementById("channel-yara-rate")) document.getElementById("channel-yara-rate").innerText = `${yaraTotal > 0 ? Math.round((yaraFechados / yaraTotal) * 100) : 0}%`;
+    if (document.getElementById("channel-crm-rate")) document.getElementById("channel-crm-rate").innerText = `${crmTotal > 0 ? Math.round((crmFechados / crmTotal) * 100) : 0}%`;
 
     renderLossHistogram(contagemObjecoes);
 };
@@ -456,7 +350,6 @@ window.calculateAdvancedMetrics = function() {
 function renderLossHistogram(objetoPerdas) {
     const container = document.getElementById("loss-reasons-container");
     if (!container) return;
-
     const valores = Object.values(objetoPerdas);
     const maxPerdas = Math.max(...valores, 1); 
     const totalPerdas = valores.reduce((a, b) => a + b, 0);
@@ -467,57 +360,32 @@ function renderLossHistogram(objetoPerdas) {
     }
 
     container.innerHTML = "";
-    const nomesAmigaveis = {
-        "Sem Caixa": "Sem Caixa / Preço",
-        "Sem Decisor": "Sem Decisor na Call",
-        "Não tem o Perfil": "Não tem Perfil (Frio)",
-        "Pensar / Sumiu": "Pediu pra pensar / Sumiu",
-        "Outro": "Outros Motivos"
-    };
+    const nomesAmigaveis = { "Sem Caixa": "Sem Caixa / Preço", "Sem Decisor": "Sem Decisor na Call", "Não tem o Perfil": "Não tem Perfil (Frio)", "Pensar / Sumiu": "Pediu pra pensar / Sumiu", "Outro": "Outros Motivos" };
 
     Object.keys(objetoPerdas).forEach(chave => {
         const quantidade = objetoPerdas[chave];
         const percentualBarra = (quantidade / maxPerdas) * 100;
-
         const row = document.createElement("div");
         row.className = "rk-row";
-        row.innerHTML = `
-            <div class="rk-label">${nomesAmigaveis[chave] || chave}</div>
-            <div class="rk-bar-bg">
-                <div class="rk-bar-fill" style="width: ${percentualBarra}%;"></div>
-            </div>
-            <div class="rk-count">${quantidade}</div>
-        `;
+        row.innerHTML = `<div class="rk-label">${nomesAmigaveis[chave] || chave}</div><div class="rk-bar-bg"><div class="rk-bar-fill" style="width: ${percentualBarra}%;"></div></div><div class="rk-count">${quantidade}</div>`;
         container.appendChild(row);
     });
 }
 
 // ==========================================================================
-// MOTOR DE INTEGRAÇÃO EXCLUSIVO COM O GOOGLE CALENDAR
+// INTEGRAÇÃO GOOGLE CALENDAR
 // ==========================================================================
 function gapiLoad() { gapi.load('client', initializeGapiClient); }
-async function initializeGapiClient() {
-    await gapi.client.init({ discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"] });
-}
-function gisInit() {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: '', 
-    });
-}
+async function initializeGapiClient() { await gapi.client.init({ discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"] }); }
+function gisInit() { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: '', }); }
 
 window.handleAuthClick = function() {
     tokenClient.callback = async (resp) => {
         if (resp.error !== undefined) throw (resp);
         await listUpcomingEvents();
     };
-
-    if (gapi.client.getToken() === null) {
-        tokenClient.requestAccessToken({prompt: 'consent'});
-    } else {
-        tokenClient.requestAccessToken({prompt: ''});
-    }
+    if (gapi.client.getToken() === null) tokenClient.requestAccessToken({prompt: 'consent'});
+    else tokenClient.requestAccessToken({prompt: ''});
 };
 
 async function listUpcomingEvents() {
@@ -527,18 +395,13 @@ async function listUpcomingEvents() {
         daquiUmaSemana.setDate(agora.getDate() + 7);
 
         const response = await gapi.client.calendar.events.list({
-            'calendarId': 'primary',
-            'timeMin': agora.toISOString(),
-            'timeMax': daquiUmaSemana.toISOString(),
-            'showDeleted': false,
-            'singleEvents': true,
-            'orderBy': 'startTime',
+            'calendarId': 'primary', 'timeMin': agora.toISOString(), 'timeMax': daquiUmaSemana.toISOString(),
+            'showDeleted': false, 'singleEvents': true, 'orderBy': 'startTime',
         });
 
         const events = response.result.items;
         const container = document.getElementById('calendar-events-list');
         if (!container) return;
-        
         container.innerHTML = '';
 
         if (!events || events.length === 0) {
@@ -567,20 +430,13 @@ async function listUpcomingEvents() {
                     <span style="font-size:11px; color:var(--text-muted);"><i class="fa-solid fa-clock"></i> ${dataTexto}</span>
                 </div>
                 <div>
-                    ${jaImportado 
-                        ? `<span class="badge-count" style="background-color:rgba(255,255,255,0.05); color:var(--text-muted);">Importado</span>`
-                        : `<button class="btn-sm-note" onclick="window.importEventToForm('${btoa(unescape(encodeURIComponent(JSON.stringify(event))))}')" style="color:var(--neon-accent); border-color:var(--neon-accent);"><i class="fa-solid fa-cloud-arrow-down"></i> Puxar</button>`
-                    }
+                    ${jaImportado ? `<span class="badge-count" style="background-color:rgba(255,255,255,0.05); color:var(--text-muted);">Importado</span>` : `<button class="btn-sm-note" onclick="window.importEventToForm('${btoa(unescape(encodeURIComponent(JSON.stringify(event))))}')" style="color:var(--neon-accent); border-color:var(--neon-accent);"><i class="fa-solid fa-cloud-arrow-down"></i> Puxar</button>`}
                 </div>
             `;
             container.appendChild(div);
         });
-
         document.getElementById('calendar-modal').style.display = 'flex';
-
-    } catch (err) {
-        console.error('Erro ao ler agenda: ', err);
-    }
+    } catch (err) { console.error('Erro ao ler agenda: ', err); }
 }
 
 window.importEventToForm = function(base64Event) {
@@ -592,10 +448,8 @@ window.importEventToForm = function(base64Event) {
     
     const start = event.start.dateTime || event.start.date;
     if(start) {
-        const d = new Date(start);
-        const pad = (n) => n.toString().padStart(2, '0');
-        const formatoInput = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-        document.getElementById('form-data-reuniao').value = formatoInput;
+        const d = new Date(start); const pad = (n) => n.toString().padStart(2, '0');
+        document.getElementById('form-data-reuniao').value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 
     const form = document.getElementById('lead-form');
@@ -603,15 +457,12 @@ window.importEventToForm = function(base64Event) {
     if(antigoIdInput) antigoIdInput.remove();
 
     const hiddenIdInput = document.createElement('input');
-    hiddenIdInput.type = 'hidden';
-    hiddenIdInput.id = 'form-calendar-id-holder';
-    hiddenIdInput.value = event.id;
+    hiddenIdInput.type = 'hidden'; hiddenIdInput.id = 'form-calendar-id-holder'; hiddenIdInput.value = event.id;
     form.appendChild(hiddenIdInput);
 
     const originalSubmit = window.handleLeadFormSubmit;
     window.handleLeadFormSubmit = async function(e) {
         e.preventDefault();
-        
         const id = document.getElementById("form-lead-id").value;
         const leadData = {
             nome: document.getElementById("form-nome").value,
@@ -633,15 +484,10 @@ window.importEventToForm = function(base64Event) {
         };
 
         try {
-            if (id) {
-                await updateDoc(doc(db, "leads", id), leadData);
-            } else {
-                await addDoc(leadsCollection, leadData);
-            }
+            if (id) await updateDoc(doc(db, "leads", id), leadData);
+            else await addDoc(leadsCollection, leadData);
             window.closeLeadModal();
             window.handleLeadFormSubmit = originalSubmit;
-        } catch (err) {
-            console.error(err);
-        }
+        } catch (err) { console.error(err); }
     };
 };
