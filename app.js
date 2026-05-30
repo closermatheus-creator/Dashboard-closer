@@ -35,6 +35,12 @@ const leadsCollection = collection(db, "leads");
 let localLeadsCache = [];
 
 // ==========================================================================
+// CONFIGURAÇÕES DA INTEGRAÇÃO GOOGLE CALENDAR (ATUALIZADO COM TOKEN REAL)
+// ==========================================================================
+const CLIENT_ID = '258420488272-c2emtfbpljfq51kvrlbna83gunrsvsas.apps.googleusercontent.com'; 
+const SCOPES = 'https://www.googleapis.com/auth/calendar.events.readonly';
+
+// ==========================================================================
 // CONFIGURAÇÕES DA INTEGRAÇÃO COOGLE CALENDAR
 // ==========================================================================
 const CLIENT_ID = '366563664458-ap982j8l8m6m7b9m8q7p9r7s8t9u1v2w.apps.googleusercontent.com'; // Gerado no console google associado ao teu app id
