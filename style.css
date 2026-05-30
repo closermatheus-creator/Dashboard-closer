@@ -475,3 +475,13 @@ body {
 
 .btn-action-row { display: flex; gap: 8px; }
 .text-muted { color: var(--text-secondary); font-size: 0.85rem; }
+/* ==========================================
+   CORREÇÃO CIRÚRGICA DE EXIBIÇÃO DE ABAS
+   ========================================== */
+.tab-content {
+    display: none !important; /* Força todas as abas a ficarem invisíveis por padrão */
+}
+
+.tab-content.active-content {
+    display: block !important; /* Mostra apenas a aba que tiver a classe ativa */
+}
