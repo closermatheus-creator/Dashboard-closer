@@ -12,35 +12,27 @@
 
     <div class="parhub-dashboard-layout">
         
-        <aside class="parhub-sidebar">
-            <div class="sidebar-brand">
-                <div class="brand-logo-wrapper">
-                    <i class="fa-solid fa-crown color-neon"></i>
-                </div>
-                <div>
-                    <h3 class="brand-title">Agência Rei</h3>
-                    <span class="brand-subtitle">Mesa de Operações</span>
-                </div>
+        <aside class="sidebar">
+    
+            <div class="sidebar-logo-container">
+                <img src="logo.png" alt="Logo Sistema" class="sidebar-logo">
             </div>
 
-            <nav class="sidebar-menu">
+            <nav class="menu-section">
                 <a href="#" class="menu-item active" onclick="switchTab(event, 'mesa-operacoes')">
-                    <i class="fa-solid fa-square-kanban"></i> Mesa de Operações
+                    <i class="fa-solid fa-table-cells-large"></i> Mesa de Operações
                 </a>
                 <a href="#" class="menu-item" onclick="switchTab(event, 'overview-insights')">
-                    <i class="fa-solid fa-chart-pie-simple"></i> Overview & Insights
+                    <i class="fa-solid fa-chart-pie"></i> Overview & Insights
                 </a>
             </nav>
 
-            <div class="sidebar-footer">
-                <div class="user-avatar-wrapper">
-                    <i class="fa-solid fa-user-tie"></i>
-                </div>
-                <div>
-                    <p class="user-name">Matheus Silva</p>
-                    <span class="user-role"><i class="fa-solid fa-circle-check color-success"></i> High Ticket Closer</span>
-                </div>
+            <div class="sidebar-actions">
+                <button class="btn-sync-calendar" onclick="window.handleAuthClick()">
+                    <i class="fa-solid fa-calendar-days"></i> Sincronizar Agenda
+                </button>
             </div>
+
         </aside>
 
         <main class="parhub-main-content">
