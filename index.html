@@ -10,21 +10,23 @@
 </head>
 <body>
 
-    <div id="login-screen" class="login-container">
-    <div class="login-card">
-        <div class="login-header">
-            <i class="fa-solid fa-chart-line login-logo"></i>
+    <!-- ==========================================
+         TELA DE LOGIN REPARADA (ATUALIZE ESTE BLOCO)
+         ========================================== -->
+    <div id="login-screen" class="auth-overlay">
+        <div class="auth-box">
+            <img src="logo.png" alt="Agência Rei" class="auth-logo">
             <h2>Mesa de Operações</h2>
-            <p>Agência Rei — Gestão de Alta Performance</p>
-        </div>
-        
-        <button id="btn-google-login" class="btn-google">
-            <i class="fa-brands fa-google"></i> Entrar com o Google
-        </button>
-        
-        <div class="login-footer">
-            <p>Acesso restrito para assessores e closers autorizados.</p>
-        </div>
+            <p class="text-muted" style="margin-bottom: 15px;">Faça login com sua conta da agência para acessar seus leads.</p>
+            
+            <!-- BOTÃO COM ID E CLASSE INTEGRADOS AO SEU CSS PRESET -->
+            <button id="btn-google-login" class="btn-primary" style="width:100%; justify-content:center;">
+                <i class="fa-brands fa-google"></i> Entrar com o Google
+            </button>
+            
+            <p class="text-muted" style="font-size: 10px; margin-top: 15px; opacity: 0.6;">
+                Acesso restrito para assessores e closers autorizados.
+            </p>
         </div>
     </div>
 
