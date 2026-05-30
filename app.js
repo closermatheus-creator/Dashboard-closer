@@ -39,27 +39,43 @@ let tokenClient;
 // ==========================================================================
 // CENTRAL DE AUTENTICAÇÃO E CONTROLE DE TRAVA DE SESSÃO
 // ==========================================================================
+// ==========================================================================
+// CENTRAL DE AUTENTICAÇÃO E CONTROLE DE TRAVA DE SESSÃO
+// ==========================================================================
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("btn-google-login").onclick = loginWithGoogle;
-    document.getElementById("btn-logout").onclick = logoutSystem;
+    // Adiciona uma verificação segura para garantir que o botão existe antes de aplicar o onclick
+    const loginBtn = document.getElementById("btn-google-login");
+    if (loginBtn) {
+        loginBtn.onclick = loginWithGoogle;
+    } else {
+        console.warn("Aviso: Botão 'btn-google-login' não foi encontrado no HTML ainda.");
+    }
+
+    const logoutBtn = document.getElementById("btn-logout");
+    if (logoutBtn) {
+        logoutBtn.onclick = logoutSystem;
+    }
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
             currentUser = user;
-            // Valida se o email pertence à Coordenadora Anna
             isAdmin = (user.email === 'anna@agenciarei.com' || user.email === 'anna.agenciarei@gmail.com');
             
-            document.getElementById("user-display-name").innerText = user.displayName || user.email;
-            document.getElementById("login-screen").style.display = "none";
-            document.getElementById("app-layout").style.display = "block";
+            const nameDisplay = document.getElementById("user-display-name");
+            if (nameDisplay) nameDisplay.innerText = user.displayName || user.email;
+            
+            if (document.getElementById("login-screen")) document.getElementById("login-screen").style.display = "none";
+            if (document.getElementById("app-layout")) document.getElementById("app-layout").style.display = "block";
 
             if (isAdmin) {
-                document.getElementById("admin-closer-filter-wrapper").style.display = "block";
-                document.getElementById("btn-export-sheets").style.display = "inline-flex";
-                document.getElementById("insights-panel-title").innerHTML = `<i class="fa-solid fa-crown" style="color:var(--warning-clean)"></i> Auditoria Estratégica da Anna`;
+                if (document.getElementById("admin-closer-filter-wrapper")) document.getElementById("admin-closer-filter-wrapper").style.display = "block";
+                if (document.getElementById("btn-export-sheets")) document.getElementById("btn-export-sheets").style.display = "inline-flex";
+                if (document.getElementById("insights-panel-title")) {
+                    document.getElementById("insights-panel-title").innerHTML = `<i class="fa-solid fa-crown" style="color:var(--warning-clean)"></i> Auditoria Estratégica da Anna`;
+                }
             } else {
-                document.getElementById("admin-closer-filter-wrapper").style.display = "none";
-                document.getElementById("btn-export-sheets").style.display = "none";
+                if (document.getElementById("admin-closer-filter-wrapper")) document.getElementById("admin-closer-filter-wrapper").style.display = "none";
+                if (document.getElementById("btn-export-sheets")) document.getElementById("btn-export-sheets").style.display = "none";
             }
 
             initRealTimeListener();
@@ -69,8 +85,8 @@ document.addEventListener("DOMContentLoaded", () => {
             currentUser = null;
             isAdmin = false;
             if (firebaseUnsubscribe) firebaseUnsubscribe();
-            document.getElementById("app-layout").style.display = "none";
-            document.getElementById("login-screen").style.display = "flex";
+            if (document.getElementById("app-layout")) document.getElementById("app-layout").style.display = "none";
+            if (document.getElementById("login-screen")) document.getElementById("login-screen").style.display = "flex";
         }
     });
 
