@@ -3,247 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PARHUB Closer - Agência Rei</title>
+    <title>Reuniões Agência Rei — Dashboard Especialista</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="dark-theme"> <div class="dashboard-layout">
+<body>
+
+    <div class="parhub-dashboard-layout">
         
-        <aside class="sidebar">
+        <aside class="parhub-sidebar">
             <div class="sidebar-brand">
-                <div class="logo-neon">
-                    <i class="fa-solid fa-bolt"></i> <span>PARHUB</span>
+                <div class="brand-logo-wrapper">
+                    <i class="fa-solid fa-crown color-neon"></i>
                 </div>
-                <span class="sub-brand">CRM de Fechamento</span>
-            </div>
-            
-            <div class="user-profile-side">
-                <div class="avatar">MS</div>
-                <div class="user-info">
-                    <span class="welcome">Bem-vindo de volta</span>
-                    <span class="username">Matheus Santos</span>
+                <div>
+                    <h3 class="brand-title">Agência Rei</h3>
+                    <span class="brand-subtitle">Mesa de Operações</span>
                 </div>
             </div>
 
-            <nav class="sidebar-nav">
-                <button class="nav-item active" id="btn-tab-mesa" onclick="switchTab('mesa')">
-                    <i class="fa-solid fa-table-list"></i> Mesa de Operações
-                </button>
-                <button class="nav-item" id="btn-tab-insights" onclick="switchTab('insights')">
-                    <i class="fa-solid fa-chart-pie"></i> Overview & Insights
-                </button>
+            <nav class="sidebar-menu">
+                <a href="#" class="menu-item active" onclick="switchTab(event, 'mesa-operacoes')">
+                    <i class="fa-solid fa-square-kanban"></i> Mesa de Operações
+                </a>
+                <a href="#" class="menu-item" onclick="switchTab(event, 'overview-insights')">
+                    <i class="fa-solid fa-chart-pie-simple"></i> Overview & Insights
+                </a>
             </nav>
-            
+
             <div class="sidebar-footer">
-                <span>v2.0.0</span>
+                <div class="user-avatar-wrapper">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <div>
+                    <p class="user-name">Matheus Silva</p>
+                    <span class="user-role"><i class="fa-solid fa-circle-check color-success"></i> High Ticket Closer</span>
+                </div>
             </div>
         </aside>
 
-        <div class="main-wrapper">
+        <main class="parhub-main-content">
             
-            <header class="top-meta-bar">
-                <div class="page-title-area">
-                    <h1 id="current-page-title">Mesa de Operações</h1>
-                    <p class="page-subtitle">Visão geral da sua mesa de vendas high-ticket</p>
+            <header class="main-header">
+                <div>
+                    <h1 id="page-title-context">Mesa de Operações</h1>
+                    <p class="text-muted sub-context">Controle de tração, fechamentos e auditoria de calls em tempo real.</p>
                 </div>
-                <div class="top-actions">
-                    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Alternar Tema">
-                        <i class="fa-solid fa-sun" id="theme-icon"></i>
+                <div class="header-actions-row">
+                    <button class="btn-secondary" onclick="window.handleAuthClick()" style="gap: 8px;">
+                        <i class="fa-brands fa-google" style="color: #4285F4;"></i> Sincronizar Google Calendar
+                    </button>
+                    <button class="btn-primary" onclick="window.openNewLeadModal()">
+                        <i class="fa-solid fa-plus"></i> Inserir Lead na Mesa
                     </button>
                 </div>
             </header>
 
-            <main class="main-content">
-                
-                <section id="tab-mesa" class="tab-content active-content">
-                    <div class="action-bar">
-                        <div class="search-placeholder"></div>
-                        <button class="btn-neon" onclick="openNewLeadModal()">
-                            <i class="fa-solid fa-plus"></i> Inserir Novo Lead
-                        </button>
-                    </div>
-
-                    <div class="parhub-card table-card">
-                        <div class="table-responsive">
-                            <table class="leads-table">
-                                <thead>
-                                    <tr>
-                                        <th>Lead / Empresa</th>
-                                        <th>Faturamento</th>
-                                        <th>SDR / Origem</th>
-                                        <th>Agendamento</th>
-                                        <th>Diagnóstico</th>
-                                        <th>Ações Pitch</th>
-                                        <th>Desfecho / Valor</th>
-                                        <th>Pagamento</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="leads-container">
-                                    </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="tab-insights" class="tab-content">
-                    
-                    <div class="metrics-summary-grid">
-                        <div class="parhub-card stat-card border-neon">
-                            <div class="card-meta">Esta Semana</div>
-                            <div class="card-main-val" id="metrics-week-money">R$ 0,00</div>
-                            <div class="card-sub-val" id="metrics-week-conv">Conversão: 0%</div>
-                        </div>
-                        <div class="parhub-card stat-card border-neon">
-                            <div class="card-meta">Esta Quinzena</div>
-                            <div class="card-main-val" id="metrics-fortnight-money">R$ 0,00</div>
-                            <div class="card-sub-val" id="metrics-fortnight-conv">Conversão: 0%</div>
-                        </div>
-                        <div class="parhub-card stat-card border-neon">
-                            <div class="card-meta">Este Mês</div>
-                            <div class="card-main-val" id="metrics-month-money">R$ 0,00</div>
-                            <div class="card-sub-val" id="metrics-month-conv">Conversão: 0%</div>
+            <section id="mesa-operacoes" class="tab-content active-content">
+                <div class="parhub-card table-card-wrapper">
+                    <div class="table-header-filter">
+                        <div class="table-title-group">
+                            <h3>Leads Ativos na Mesa</h3>
+                            <span class="badge-count" id="table-total-count">0 Leads</span>
                         </div>
                     </div>
 
-                    <div class="parhub-card filter-card">
-                        <div class="filter-group">
-                            <label for="filter-sdr-select"><i class="fa-solid fa-user-gear"></i> Raio-X do SDR:</label>
-                            <select id="filter-sdr-select" onchange="calculateAdvancedMetrics()">
-                                <option value="todos">Todos os SDRs (Geral)</option>
-                            </select>
+                    <div class="responsive-table-holder">
+                        <table class="parhub-premium-table">
+                            <thead>
+                                <tr>
+                                    <th>Lead / Empresa</th>
+                                    <th>Faturamento</th>
+                                    <th>SDR / Origem</th>
+                                    <th>Data Reunião</th>
+                                    <th>Qualificação</th>
+                                    <th>Estratégia (Pitch)</th>
+                                    <th>Desfecho / Contrato</th>
+                                    <th>Data Pagamento</th>
+                                    <th style="text-align: right;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leads-container">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="overview-insights" class="tab-content">
+                <div class="filter-bar-insights parhub-card">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <i class="fa-solid fa-filter color-neon" style="font-size:18px;"></i>
+                        <div>
+                            <h4 style="margin:0; font-size:15px;">Inteligência Competitiva</h4>
+                            <p class="text-muted" style="margin:0; font-size:12px;">Selecione um SDR específico para analisar as taxas de conversão isoladas</p>
                         </div>
                     </div>
+                    <select id="filter-sdr-select" onchange="window.calculateAdvancedMetrics()" class="premium-select-filter">
+                        <option value="todos">Todos os SDRs (Visão Geral)</option>
+                    </select>
+                </div>
 
-                    <div class="analytics-row-grid">
-                        <div class="parhub-card intelligence-card">
-                            <div class="intel-header">
-                                <i class="fa-solid fa-chart-bar"></i>
-                                <div>
-                                    <h4>Taxa de Pitch</h4>
-                                    <span>Efetividade do SDR pós-filtro</span>
-                                </div>
-                            </div>
-                            <div class="intel-big-num" id="sdr-pitch-rate">0%</div>
-                            <div class="intel-footer-text" id="sdr-pitch-details">0 Fechados / 0 Pitches</div>
+                <div class="metrics-macro-grid">
+                    <div class="parhub-card metric-card border-purple">
+                        <div class="metric-header">
+                            <span>Faturamento Semanal</span>
+                            <i class="fa-solid fa-calendar-week icon-box-purple"></i>
                         </div>
+                        <h2 id="metrics-week-money">R$ 0,00</h2>
+                        <span class="metric-footer" id="metrics-week-conv">Conversão: 0%</span>
+                    </div>
 
-                        <div class="parhub-card intelligence-card">
-                            <div class="intel-header">
-                                <i class="fa-solid fa-user-check"></i>
-                                <div>
-                                    <h4>Presença de Decisores</h4>
-                                    <span>Qualidade do agendamento</span>
-                                </div>
-                            </div>
-                            <div class="intel-big-num" id="sdr-decisor-rate">0%</div>
-                            <div class="intel-footer-text" id="sdr-decisor-details">0 Presentes / 0 Totais</div>
+                    <div class="parhub-card metric-card border-blue">
+                        <div class="metric-header">
+                            <span>Faturamento Quinzenal</span>
+                            <i class="fa-solid fa-calendar-days icon-box-blue"></i>
                         </div>
+                        <h2 id="metrics-fortnight-money">R$ 0,00</h2>
+                        <span class="metric-footer" id="metrics-fortnight-conv">Conversão: 0%</span>
+                    </div>
 
-                        <div class="parhub-card intelligence-card">
-                            <div class="intel-header">
-                                <i class="fa-solid fa-network-wired"></i>
-                                <div>
-                                    <h4>Conversão por Canal</h4>
-                                    <span>Yara vs CRM</span>
-                                </div>
-                            </div>
-                            <div class="channel-list-wrapper">
-                                <div class="channel-item">
-                                    <span class="ch-name">I.A Yara</span>
-                                    <span class="ch-pct color-neon" id="channel-yara-rate">0%</span>
-                                </div>
-                                <div class="channel-item">
-                                    <span class="ch-name">CRM Tradicional</span>
-                                    <span class="ch-pct color-neon" id="channel-crm-rate">0%</span>
-                                </div>
+                    <div class="parhub-card metric-card border-neon">
+                        <div class="metric-header">
+                            <span>Faturamento Mensal</span>
+                            <i class="fa-solid fa-calendar-star icon-box-neon"></i>
+                        </div>
+                        <h2 id="metrics-month-money">R$ 0,00</h2>
+                        <span class="metric-footer" id="metrics-month-conv">Conversão: 0%</span>
+                    </div>
+                </div>
+
+                <div class="analytics-row-grid">
+                    <div class="parhub-card intelligence-card">
+                        <div class="intel-header">
+                            <i class="fa-solid fa-bullseye-arrow"></i>
+                            <div>
+                                <h4>Efetividade de Pitch</h4>
+                                <span>Conversão de quem ouviu a oferta</span>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="parhub-card ranking-card">
-                        <div class="ranking-header">
-                            <h4><i class="fa-solid fa-triangle-exclamation"></i> Histograma de Perdas e Objeções</h4>
-                        </div>
-                        <div class="ranking-body" id="loss-reasons-container">
-                            <p class="text-muted">Nenhum lead perdido encontrado para os filtros selecionados.</p>
+                        <div class="intel-body-large">
+                            <h1 id="sdr-pitch-rate">0%</h1>
+                            <p id="sdr-pitch-details" class="text-muted">0 Fechados / 0 Pitches Realizados</p>
                         </div>
                     </div>
 
-                </section>
-            </main>
-        </div>
+                    <div class="parhub-card intelligence-card">
+                        <div class="intel-header">
+                            <i class="fa-solid fa-user-check"></i>
+                            <div>
+                                <h4>Presença de Decisores</h4>
+                                <span>Filtro e assertividade do agendamento</span>
+                            </div>
+                        </div>
+                        <div class="intel-body-large">
+                            <h1 id="sdr-decisor-rate">0%</h1>
+                            <p id="sdr-decisor-details" class="text-muted">0 Presentes / 0 Reuniões</p>
+                        </div>
+                    </div>
+
+                    <div class="parhub-card intelligence-card">
+                        <div class="intel-header">
+                            <i class="fa-solid fa-filter"></i>
+                            <div>
+                                <h4>Raio-X do Funil</h4>
+                                <span>Volume e Qualificação de Reuniões</span>
+                            </div>
+                        </div>
+                        <div class="channel-list-wrapper" style="margin-top: 15px;">
+                            <div class="channel-item">
+                                <span>Total Agendadas:</span>
+                                <strong id="funnel-total">0</strong>
+                            </div>
+                            <div class="channel-item">
+                                <span>No-Shows (Faltas):</span>
+                                <strong style="color: var(--danger-clean);" id="funnel-noshow">0</strong>
+                            </div>
+                            <div class="channel-item">
+                                <span>Qualificadas (Pitch):</span>
+                                <strong style="color: var(--success-clean);" id="funnel-qualificados">0</strong>
+                            </div>
+                            <div class="channel-item">
+                                <span>Não Qualificadas:</span>
+                                <strong style="color: var(--warning-clean);" id="funnel-reprovados">0</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-row-grid" style="margin-top: 24px;">
+                    <div class="parhub-card intelligence-card">
+                        <div class="intel-header">
+                            <i class="fa-solid fa-circle-nodes"></i>
+                            <div>
+                                <h4>Canais de Conversão</h4>
+                                <span>Taxa de fechamento por origem de lead</span>
+                            </div>
+                        </div>
+                        <div class="channel-list-wrapper">
+                            <div class="channel-item">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span class="dot-indicator bg-blue"></span>
+                                    <span>I.A Yara</span>
+                                </div>
+                                <strong id="channel-yara-rate">0%</strong>
+                            </div>
+                            <div class="channel-item">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span class="dot-indicator bg-purple"></span>
+                                    <span>CRM Próprio</span>
+                                </div>
+                                <strong id="channel-crm-rate">0%</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="parhub-card intelligence-card" style="grid-column: span 2;">
+                        <div class="intel-header">
+                            <i class="fa-solid fa-chart-simple-horizontal"></i>
+                            <div>
+                                <h4>Mapa de Objeções & Perdas</h4>
+                                <span>Entenda os principais gargalos que estão travando as vendas</span>
+                            </div>
+                        </div>
+                        <div class="rk-histogram-container" id="loss-reasons-container">
+                            </div>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
 
-    <div id="notes-modal" class="parhub-modal">
-        <div class="modal-box">
+    <div id="lead-form-modal" class="parhub-modal-overlay">
+        <div class="parhub-modal-box">
             <div class="modal-box-header">
-                <h3><i class="fa-solid fa-paragraph"></i> Notas Estratégicas da Call</h3>
-                <button class="modal-close-icon" onclick="closeNotesModal()">&times;</button>
+                <h3 id="form-modal-title"><i class="fa-solid fa-user-plus"></i> Inserir Lead na Mesa</h3>
+                <button class="modal-close-btn" onclick="window.closeLeadModal()">&times;</button>
             </div>
-            <div class="modal-box-body">
-                <p class="lead-context-display">Lead: <span id="modal-lead-name" class="color-neon">-</span></p>
-                <textarea id="lead-notes-area" placeholder="Escreva as dores latentes, gatilhos mentais mapeados e objeções do lead..."></textarea>
-            </div>
-            <div class="modal-box-footer">
-                <button class="btn-cancel" onclick="closeNotesModal()">Voltar</button>
-                <button class="btn-neon" id="save-notes-btn">Salvar Alterações</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="lead-form-modal" class="parhub-modal">
-        <div class="modal-box large-box">
-            <div class="modal-box-header">
-                <h3 id="form-modal-title"><i class="fa-solid fa-sliders"></i> Atualizar Dados da Linha</h3>
-                <button class="modal-close-icon" onclick="closeLeadModal()">&times;</button>
-            </div>
-            <form id="lead-form" onsubmit="handleLeadFormSubmit(event)">
+            <form id="lead-form" onsubmit="window.handleLeadFormSubmit(event)">
                 <input type="hidden" id="form-lead-id">
-                <div class="parhub-form-grid">
+                
+                <div class="form-row-grid">
                     <div class="input-container">
                         <label>Nome do Lead *</label>
-                        <input type="text" id="form-nome" required>
+                        <input type="text" id="form-nome" required placeholder="Ex: Roberto Silva">
                     </div>
                     <div class="input-container">
-                        <label>Nome da Empresa</label>
-                        <input type="text" id="form-empresa">
+                        <label>Nome da Empresa / Operação</label>
+                        <input type="text" id="form-empresa" placeholder="Ex: Agência Alfa">
+                    </div>
+                </div>
+
+                <div class="form-row-grid">
+                    <div class="input-container">
+                        <label>Faturamento Atual do Lead</label>
+                        <input type="text" id="form-faturamento" placeholder="Ex: 50k a 100k">
                     </div>
                     <div class="input-container">
-                        <label>Faturamento Mensal</label>
-                        <input type="text" id="form-faturamento" placeholder="Ex: R$ 100k">
+                        <label>SDR responsável</label>
+                        <input type="text" id="form-sdr" placeholder="Ex: Bruno ou Ingrid">
+                    </div>
+                </div>
+
+                <div class="form-row-grid">
+                    <div class="input-container">
+                        <label>Data e Hora da Call *</label>
+                        <input type="datetime-local" id="form-data-reuniao" required>
                     </div>
                     <div class="input-container">
-                        <label>Nome do SDR</label>
-                        <input type="text" id="form-sdr">
-                    </div>
-                    <div class="input-container">
-                        <label>Dia e Horário da Reunião</label>
-                        <input type="datetime-local" id="form-data-reuniao">
-                    </div>
-                    <div class="input-container">
-                        <label>Origem do Lead</label>
+                        <label>Canal de Origem</label>
                         <select id="form-origem">
                             <option value="I.A Yara">I.A Yara</option>
                             <option value="CRM">CRM</option>
                         </select>
                     </div>
+                </div>
+
+                <div class="form-row-grid">
                     <div class="input-container">
-                        <label>Decisor Presente?</label>
+                        <label>É o Decisor Final?</label>
                         <select id="form-decisor">
                             <option value="Sim">Sim</option>
                             <option value="Não">Não</option>
                         </select>
                     </div>
                     <div class="input-container">
-                        <label>Status do Diagnóstico</label>
+                        <label>Status do Diagnóstico / Presença</label>
                         <select id="form-status-diag">
                             <option value="Aprovado para Pitch">Aprovado para Pitch</option>
-                            <option value="Reprovado">Reprovado</option>
+                            <option value="Reprovado">Reprovado (Não Qualificado)</option>
+                            <option value="No-Show">No-Show (Faltou à reunião)</option>
                         </select>
                     </div>
+                </div>
+
+                <div class="form-row-grid">
                     <div class="input-container">
-                        <label>Deu Pitch?</label>
+                        <label>Houve Pitch de Oferta?</label>
                         <select id="form-pitch">
                             <option value="Sim">Sim</option>
                             <option value="Não">Não</option>
@@ -256,83 +313,124 @@
                             <option value="Sim">Sim</option>
                         </select>
                     </div>
+                </div>
+
+                <div class="form-row-grid">
                     <div class="input-container">
-                        <label>Desfecho Comercial</label>
-                        <select id="form-desfecho" onchange="toggleLossReasonField()">
+                        <label>Desfecho Comercial *</label>
+                        <select id="form-desfecho" onchange="window.toggleLossReasonField()" required>
                             <option value="Em Aberto">Em Aberto</option>
-                            <option value="Fechado">Fechado</option>
+                            <option value="Fechado">Fechado (Venda Concluída)</option>
                             <option value="Downsell">Downsell</option>
                             <option value="Perdido">Perdido</option>
                         </select>
                     </div>
                     <div class="input-container">
-                        <label>Valor do Contrato (R$)</label>
-                        <input type="number" id="form-valor" step="0.01" value="0.00">
+                        <label>Valor do Contrato Fechado (R$)</label>
+                        <input type="number" id="form-valor" step="0.01" value="0" placeholder="Ex: 5000">
                     </div>
+                </div>
+
+                <div class="form-row-grid">
                     <div class="input-container">
-                        <label>Data de Pagamento Combinada</label>
+                        <label>Data do Pagamento / Pix</label>
                         <input type="date" id="form-data-pagamento">
                     </div>
-                    <div class="input-container dynamic-group" id="loss-reason-group" style="display:none;">
-                        <label>Motivo da Perda (Objeção)</label>
+                    <div class="input-container" id="loss-reason-group" style="display: none;">
+                        <label>Principal Motivo da Perda</label>
                         <select id="form-motivo-perda">
-                            <option value="">Selecione o motivo...</option>
                             <option value="Sem Caixa">Sem Caixa / Preço</option>
                             <option value="Sem Decisor">Sem Decisor na Call</option>
-                            <option value="Não tem o Perfil">Não tem o Perfil / Lead Frio</option>
-                            <option value="Pensar / Sumiu">Pediu para pensar / Sumiu</option>
-                            <option value="Outro">Outro motivo</option>
+                            <option value="Não tem o Perfil">Não tem Perfil (Frio)</option>
+                            <option value="Pensar / Sumiu">Pediu pra pensar / Sumiu</option>
+                            <option value="Outro">Outros Motivos</option>
                         </select>
                     </div>
                 </div>
-                <div class="modal-box-footer" style="margin-top:20px; padding-top:15px;">
-                    <button type="button" class="btn-cancel" onclick="closeLeadModal()">Descartar</button>
-                    <button type="submit" class="btn-neon">Confirmar Entrada</button>
+
+                <div class="modal-box-actions" style="margin-top:20px;">
+                    <button type="button" class="btn-secondary" onclick="window.closeLeadModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar na Mesa</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <div id="notes-modal" class="parhub-modal-overlay">
+        <div class="parhub-modal-box note-box-size">
+            <div class="modal-box-header">
+                <div>
+                    <h3 style="margin:0;"><i class="fa-solid fa-comment-dots color-neon"></i> Notas da Call</h3>
+                    <span class="text-muted" style="font-size:12px;" id="modal-lead-name">—</span>
+                </div>
+                <button class="modal-close-btn" onclick="window.closeNotesModal()">&times;</button>
+            </div>
+            <div style="margin-top:15px;">
+                <textarea id="lead-notes-area" rows="8" class="premium-textarea" placeholder="Cole aqui a transcrição da call ou anote as principais objeções, dores do negócio, metas e próximos passos combinados..."></textarea>
+            </div>
+            <div class="modal-box-actions" style="margin-top:15px;">
+                <button class="btn-secondary" onclick="window.closeNotesModal()">Fechar</button>
+                <button class="btn-primary" id="save-notes-btn">Salvar Observações</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="calendar-modal" class="parhub-modal-overlay">
+        <div class="parhub-modal-box" style="max-width: 700px;">
+            <div class="modal-box-header">
+                <div>
+                    <h3 style="margin:0;"><i class="fa-brands fa-google color-neon"></i> Reuniões da Agenda Google</h3>
+                    <span class="text-muted" style="font-size:12px;">Selecione os compromissos da Agência Rei para importar sem duplicar</span>
+                </div>
+                <button class="modal-close-btn" onclick="document.getElementById('calendar-modal').style.display='none'">&times;</button>
+            </div>
+            <div class="responsive-table-holder" style="max-height: 400px; margin-top: 15px;">
+                <table class="parhub-premium-table">
+                    <thead>
+                        <tr>
+                            <th>Título do Evento</th>
+                            <th>Data e Hora</th>
+                            <th style="text-align: right;">Ação</th>
+                        </tr>
+                    </table>
+                    <div id="calendar-events-list">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="app.js"></script>
     <script>
-        // Chaves de Abas Integradas com os títulos dinâmicos
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-content'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        // Sistema básico de troca de abas limpo e sem bugs
+        function switchTab(event, tabId) {
+            event.preventDefault();
             
-            document.getElementById('tab-' + tabName).classList.add('active-content');
-            document.getElementById('btn-tab-' + tabName).classList.add('active');
-            
-            const titleEl = document.getElementById('current-page-title');
-            const subEl = document.querySelector('.page-subtitle');
-            
-            if(tabName === 'mesa') {
-                titleEl.innerText = "Mesa de Operações";
-                subEl.innerText = "Visão geral da sua mesa de vendas high-ticket";
-            } else {
-                titleEl.innerText = "Overview & Analytics";
-                subEl.innerText = "Métricas completas e rastreamento faixa preta de conversão";
-                window.dispatchEvent(new CustomEvent('refresh-metrics'));
-            }
-        }
+            // Remove estados ativos dos links da barra lateral
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
 
-        // Sistema Real-time de Alternância de Tema Claro / Escuro
-        function toggleTheme() {
-            const body = document.body;
-            const icon = document.getElementById('theme-icon');
-            
-            if (body.classList.contains('dark-theme')) {
-                body.classList.remove('dark-theme');
-                body.classList.add('light-theme');
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
+            // Troca de exibição de blocos
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-content'));
+            const targetContent = document.getElementById(tabId);
+            if(targetContent) targetContent.classList.add('active-content');
+
+            // Ajusta o texto do Header dinamicamente
+            const titleContext = document.getElementById("page-title-context");
+            const subContext = document.getElementById("sub-context");
+            if(tabId === 'overview-insights') {
+                titleContext.innerText = "Overview & Insights";
+                subContext.innerText = "Métricas avançadas, histogramas de perdas e performance individual do time.";
+                // Dispara o evento que o app.js escuta para remontar os gráficos e filtros
+                window.dispatchEvent(new CustomEvent('refresh-metrics'));
             } else {
-                body.classList.remove('light-theme');
-                body.classList.add('dark-theme');
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
+                titleContext.innerText = "Mesa de Operações";
+                subContext.innerText = "Controle de tração, fechamentos e auditoria de calls em tempo real.";
             }
         }
     </script>
+
+    <script async defer src="https://apis.google.com/js/api.js"></script>
+    <script async defer src="https://accounts.google.com/gsi/client"></script>
 </body>
 </html>
