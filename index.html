@@ -3,333 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reuniões Agência Rei — Dashboard Especialista</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Reuniões Agência Rei — Mesa de Operações</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="parhub-dashboard-layout">
-        
-        <aside class="parhub-sidebar">
-            
-            <div class="sidebar-logo-container">
-                <img src="logo.png" alt="Agência Rei" class="sidebar-logo">
-            </div>
+    <header class="main-top-navbar">
+        <div class="navbar-left">
+            <img src="logo.png" alt="Agência Rei" class="top-logo">
+            <div class="title-separator"></div>
+            <h1 id="page-title-context">Mesa de Operações</h1>
+        </div>
 
-            <nav class="sidebar-menu">
+        <div class="navbar-right">
+            <nav class="top-menu">
                 <a href="#" class="menu-item active" onclick="switchTab(event, 'mesa-operacoes')">
-                    <i class="fa-solid fa-square-kanban"></i> Mesa de Operações
+                    <i class="fa-solid fa-square-kanban"></i> Mesa
                 </a>
                 <a href="#" class="menu-item" onclick="switchTab(event, 'overview-insights')">
-                    <i class="fa-solid fa-chart-pie"></i> Overview & Insights
+                    <i class="fa-solid fa-chart-pie"></i> Insights
                 </a>
             </nav>
 
-            <div class="sidebar-actions-zone">
-                <button class="btn-sync-calendar" onclick="window.handleAuthClick()">
-                    <i class="fa-brands fa-google"></i> Sincronizar Agenda
-                </button>
-            </div>
+            <div class="action-separator"></div>
 
-            <div class="sidebar-footer">
-                <div class="user-avatar-wrapper">
-                    <i class="fa-solid fa-user-tie"></i>
-                </div>
-                <div>
-                    <p class="user-name">Matheus Silva</p>
-                    <span class="user-role"><i class="fa-solid fa-circle-check color-success"></i> High Ticket Closer</span>
-                </div>
-            </div>
-        </aside>
-
-        <main class="parhub-main-content">
+            <button class="btn-sync-calendar" onclick="window.handleAuthClick()">
+                <i class="fa-brands fa-google"></i> Sincronizar Agenda
+            </button>
+            <button class="btn-primary" onclick="window.openNewLeadModal()">
+                <i class="fa-solid fa-plus"></i> Inserir Lead
+            </button>
             
-            <header class="main-header">
-                <div>
-                    <h1 id="page-title-context">Mesa de Operações</h1>
-                    <p class="text-muted sub-context">Controle de tração, fechamentos e auditoria de calls em tempo real.</p>
-                </div>
-                <div class="header-actions-row">
-                    <button class="btn-primary" onclick="window.openNewLeadModal()">
-                        <i class="fa-solid fa-plus"></i> Inserir Lead na Mesa
-                    </button>
-                </div>
-            </header>
+            <div class="user-avatar-small" title="Matheus Silva - Closer">
+                <i class="fa-solid fa-user-tie"></i>
+            </div>
+        </div>
+    </header>
 
-            <section id="mesa-operacoes" class="tab-content active-content">
-                <div class="parhub-card table-card-wrapper">
-                    <div class="table-header-filter">
-                        <div class="table-title-group">
-                            <h3>Leads Ativos na Mesa</h3>
-                            <span class="badge-count" id="table-total-count">0 Leads</span>
-                        </div>
-                    </div>
+    <main class="parhub-main-content">
 
-                    <div class="responsive-table-holder">
-                        <table class="parhub-premium-table">
-                            <thead>
-                                <tr>
-                                    <th>Lead / Empresa</th>
-                                    <th>Faturamento</th>
-                                    <th>SDR / Origem</th>
-                                    <th>Data Reunião</th>
-                                    <th>Qualificação</th>
-                                    <th>Estratégia (Pitch)</th>
-                                    <th>Desfecho / Contrato</th>
-                                    <th>Data Pagamento</th>
-                                    <th style="text-align: right;">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="leads-container">
-                                </tbody>
-                        </table>
+        <section id="mesa-operacoes" class="tab-content active-content">
+            <div class="parhub-card table-card-wrapper">
+                <div class="table-header-filter">
+                    <div class="table-title-group">
+                        <h3>Leads Ativos na Mesa</h3>
+                        <span class="badge-count" id="table-total-count">0 Leads</span>
                     </div>
                 </div>
-            </section>
 
-            <section id="overview-insights" class="tab-content">
-                <div class="filter-bar-insights parhub-card">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <i class="fa-solid fa-filter color-neon" style="font-size:18px;"></i>
+                <div class="responsive-table-holder">
+                    <table class="parhub-premium-table">
+                        <thead>
+                            <tr>
+                                <th>Lead / Empresa</th>
+                                <th>Faturamento</th>
+                                <th>SDR / Origem</th>
+                                <th>Data Reunião</th>
+                                <th>Qualificação</th>
+                                <th>Estratégia (Pitch)</th>
+                                <th>Desfecho / Contrato</th>
+                                <th>Data Pgto</th>
+                                <th style="text-align: right;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leads-container">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="overview-insights" class="tab-content">
+            <div class="filter-bar-insights parhub-card">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <i class="fa-solid fa-filter color-neon" style="font-size:14px;"></i>
+                    <div>
+                        <h4 style="margin:0; font-size:13px;">Inteligência Competitiva</h4>
+                    </div>
+                </div>
+                <select id="filter-sdr-select" onchange="window.calculateAdvancedMetrics()" class="premium-select-filter">
+                    <option value="todos">Todos os SDRs (Visão Geral)</option>
+                </select>
+            </div>
+
+            <div class="metrics-macro-grid">
+                <div class="parhub-card metric-card border-purple">
+                    <div class="metric-header">
+                        <span>Fat. Semanal</span>
+                        <i class="fa-solid fa-calendar-week icon-box-purple"></i>
+                    </div>
+                    <h2 id="metrics-week-money">R$ 0,00</h2>
+                    <span class="metric-footer" id="metrics-week-conv">Conversão: 0%</span>
+                </div>
+
+                <div class="parhub-card metric-card border-blue">
+                    <div class="metric-header">
+                        <span>Fat. Quinzenal</span>
+                        <i class="fa-solid fa-calendar-days icon-box-blue"></i>
+                    </div>
+                    <h2 id="metrics-fortnight-money">R$ 0,00</h2>
+                    <span class="metric-footer" id="metrics-fortnight-conv">Conversão: 0%</span>
+                </div>
+
+                <div class="parhub-card metric-card border-neon">
+                    <div class="metric-header">
+                        <span>Fat. Mensal</span>
+                        <i class="fa-solid fa-calendar-star icon-box-neon"></i>
+                    </div>
+                    <h2 id="metrics-month-money">R$ 0,00</h2>
+                    <span class="metric-footer" id="metrics-month-conv">Conversão: 0%</span>
+                </div>
+            </div>
+
+            <div class="analytics-row-grid">
+                <div class="parhub-card intelligence-card">
+                    <div class="intel-header">
+                        <i class="fa-solid fa-bullseye"></i>
                         <div>
-                            <h4 style="margin:0; font-size:15px;">Inteligência Competitiva</h4>
-                            <p class="text-muted" style="margin:0; font-size:12px;">Selecione um SDR específico para analisar as taxas</p>
+                            <h4>Efetividade de Pitch</h4>
                         </div>
                     </div>
-                    <select id="filter-sdr-select" onchange="window.calculateAdvancedMetrics()" class="premium-select-filter">
-                        <option value="todos">Todos os SDRs (Visão Geral)</option>
-                    </select>
-                </div>
-
-                <div class="metrics-macro-grid">
-                    <div class="parhub-card metric-card border-purple">
-                        <div class="metric-header">
-                            <span>Faturamento Semanal</span>
-                            <i class="fa-solid fa-calendar-week icon-box-purple"></i>
-                        </div>
-                        <h2 id="metrics-week-money">R$ 0,00</h2>
-                        <span class="metric-footer" id="metrics-week-conv">Conversão: 0%</span>
-                    </div>
-
-                    <div class="parhub-card metric-card border-blue">
-                        <div class="metric-header">
-                            <span>Faturamento Quinzenal</span>
-                            <i class="fa-solid fa-calendar-days icon-box-blue"></i>
-                        </div>
-                        <h2 id="metrics-fortnight-money">R$ 0,00</h2>
-                        <span class="metric-footer" id="metrics-fortnight-conv">Conversão: 0%</span>
-                    </div>
-
-                    <div class="parhub-card metric-card border-neon">
-                        <div class="metric-header">
-                            <span>Faturamento Mensal</span>
-                            <i class="fa-solid fa-calendar-star icon-box-neon"></i>
-                        </div>
-                        <h2 id="metrics-month-money">R$ 0,00</h2>
-                        <span class="metric-footer" id="metrics-month-conv">Conversão: 0%</span>
+                    <div class="intel-body-large">
+                        <h1 id="sdr-pitch-rate">0%</h1>
+                        <p id="sdr-pitch-details" class="text-muted">0 Fechados / 0 Pitches</p>
                     </div>
                 </div>
 
-                <div class="analytics-row-grid">
-                    <div class="parhub-card intelligence-card">
-                        <div class="intel-header">
-                            <i class="fa-solid fa-bullseye"></i>
-                            <div>
-                                <h4>Efetividade de Pitch</h4>
-                                <span>Conversão de quem ouviu a oferta</span>
-                            </div>
-                        </div>
-                        <div class="intel-body-large">
-                            <h1 id="sdr-pitch-rate">0%</h1>
-                            <p id="sdr-pitch-details" class="text-muted">0 Fechados / 0 Pitches</p>
+                <div class="parhub-card intelligence-card">
+                    <div class="intel-header">
+                        <i class="fa-solid fa-user-check"></i>
+                        <div>
+                            <h4>Presença Decisores</h4>
                         </div>
                     </div>
+                    <div class="intel-body-large">
+                        <h1 id="sdr-decisor-rate">0%</h1>
+                        <p id="sdr-decisor-details" class="text-muted">0 Presentes / 0 Reuniões</p>
+                    </div>
+                </div>
 
-                    <div class="parhub-card intelligence-card">
-                        <div class="intel-header">
-                            <i class="fa-solid fa-user-check"></i>
-                            <div>
-                                <h4>Presença de Decisores</h4>
-                                <span>Assertividade do agendamento</span>
-                            </div>
-                        </div>
-                        <div class="intel-body-large">
-                            <h1 id="sdr-decisor-rate">0%</h1>
-                            <p id="sdr-decisor-details" class="text-muted">0 Presentes / 0 Reuniões</p>
+                <div class="parhub-card intelligence-card">
+                    <div class="intel-header">
+                        <i class="fa-solid fa-filter"></i>
+                        <div>
+                            <h4>Raio-X do Funil</h4>
                         </div>
                     </div>
+                    <div class="channel-list-wrapper" style="margin-top: 10px;">
+                        <div class="channel-item"><span>Agendadas:</span><strong id="funnel-total">0</strong></div>
+                        <div class="channel-item"><span>No-Shows:</span><strong style="color: var(--danger-clean);" id="funnel-noshow">0</strong></div>
+                        <div class="channel-item"><span>Qualificadas:</span><strong style="color: var(--success-clean);" id="funnel-qualificados">0</strong></div>
+                        <div class="channel-item"><span>Reprovadas:</span><strong style="color: var(--warning-clean);" id="funnel-reprovados">0</strong></div>
+                    </div>
+                </div>
+            </div>
 
-                    <div class="parhub-card intelligence-card">
-                        <div class="intel-header">
-                            <i class="fa-solid fa-filter"></i>
-                            <div>
-                                <h4>Raio-X do Funil</h4>
-                                <span>Qualificação de Reuniões</span>
-                            </div>
+            <div class="analytics-row-grid" style="margin-top: 15px;">
+                <div class="parhub-card intelligence-card">
+                    <div class="intel-header">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <div>
+                            <h4>Canais (Origem)</h4>
                         </div>
-                        <div class="channel-list-wrapper" style="margin-top: 15px;">
-                            <div class="channel-item"><span>Total Agendadas:</span><strong id="funnel-total">0</strong></div>
-                            <div class="channel-item"><span>No-Shows:</span><strong style="color: var(--danger-clean);" id="funnel-noshow">0</strong></div>
-                            <div class="channel-item"><span>Qualificadas:</span><strong style="color: var(--success-clean);" id="funnel-qualificados">0</strong></div>
-                            <div class="channel-item"><span>Não Qualificadas:</span><strong style="color: var(--warning-clean);" id="funnel-reprovados">0</strong></div>
+                    </div>
+                    <div class="channel-list-wrapper">
+                        <div class="channel-item">
+                            <div style="display:flex; align-items:center; gap:6px;"><span class="dot-indicator bg-blue"></span><span>I.A Yara</span></div>
+                            <strong id="channel-yara-rate">0%</strong>
+                        </div>
+                        <div class="channel-item">
+                            <div style="display:flex; align-items:center; gap:6px;"><span class="dot-indicator bg-purple"></span><span>CRM Próprio</span></div>
+                            <strong id="channel-crm-rate">0%</strong>
                         </div>
                     </div>
                 </div>
 
-                <div class="analytics-row-grid" style="margin-top: 24px;">
-                    <div class="parhub-card intelligence-card">
-                        <div class="intel-header">
-                            <i class="fa-solid fa-chart-line"></i>
-                            <div>
-                                <h4>Canais de Conversão</h4>
-                                <span>Taxa por origem</span>
-                            </div>
-                        </div>
-                        <div class="channel-list-wrapper">
-                            <div class="channel-item">
-                                <div style="display:flex; align-items:center; gap:8px;"><span class="dot-indicator bg-blue"></span><span>I.A Yara</span></div>
-                                <strong id="channel-yara-rate">0%</strong>
-                            </div>
-                            <div class="channel-item">
-                                <div style="display:flex; align-items:center; gap:8px;"><span class="dot-indicator bg-purple"></span><span>CRM Próprio</span></div>
-                                <strong id="channel-crm-rate">0%</strong>
-                            </div>
+                <div class="parhub-card intelligence-card" style="grid-column: span 2;">
+                    <div class="intel-header">
+                        <i class="fa-solid fa-chart-bar"></i>
+                        <div>
+                            <h4>Mapa de Objeções & Perdas</h4>
                         </div>
                     </div>
-
-                    <div class="parhub-card intelligence-card" style="grid-column: span 2;">
-                        <div class="intel-header">
-                            <i class="fa-solid fa-chart-bar"></i>
-                            <div>
-                                <h4>Mapa de Objeções & Perdas</h4>
-                                <span>Principais gargalos travando as vendas</span>
-                            </div>
-                        </div>
-                        <div class="rk-histogram-container" id="loss-reasons-container"></div>
-                    </div>
+                    <div class="rk-histogram-container" id="loss-reasons-container"></div>
                 </div>
-            </section>
-        </main>
-    </div>
+            </div>
+        </section>
+    </main>
 
     <div id="lead-form-modal" class="parhub-modal-overlay">
         <div class="parhub-modal-box">
             <div class="modal-box-header">
-                <h3 id="form-modal-title"><i class="fa-solid fa-user-plus"></i> Inserir Lead na Mesa</h3>
+                <h3 id="form-modal-title"><i class="fa-solid fa-user-plus"></i> Inserir Lead</h3>
                 <button class="modal-close-btn" onclick="window.closeLeadModal()">&times;</button>
             </div>
             <form id="lead-form" onsubmit="window.handleLeadFormSubmit(event)">
                 <input type="hidden" id="form-lead-id">
-                
                 <div class="form-row-grid">
-                    <div class="input-container">
-                        <label>Nome do Lead *</label>
-                        <input type="text" id="form-nome" required placeholder="Ex: Roberto Silva">
-                    </div>
-                    <div class="input-container">
-                        <label>Nome da Empresa / Operação</label>
-                        <input type="text" id="form-empresa" placeholder="Ex: Agência Alfa">
-                    </div>
+                    <div class="input-container"><label>Nome *</label><input type="text" id="form-nome" required></div>
+                    <div class="input-container"><label>Empresa</label><input type="text" id="form-empresa"></div>
                 </div>
-
                 <div class="form-row-grid">
-                    <div class="input-container">
-                        <label>Faturamento Atual do Lead</label>
-                        <input type="text" id="form-faturamento" placeholder="Ex: 50k a 100k">
-                    </div>
-                    <div class="input-container">
-                        <label>SDR responsável</label>
-                        <input type="text" id="form-sdr" placeholder="Ex: Bruno ou Ingrid">
-                    </div>
+                    <div class="input-container"><label>Faturamento</label><input type="text" id="form-faturamento"></div>
+                    <div class="input-container"><label>SDR</label><input type="text" id="form-sdr"></div>
                 </div>
-
                 <div class="form-row-grid">
-                    <div class="input-container">
-                        <label>Data e Hora da Call *</label>
-                        <input type="datetime-local" id="form-data-reuniao" required>
-                    </div>
-                    <div class="input-container">
-                        <label>Canal de Origem</label>
-                        <select id="form-origem">
-                            <option value="I.A Yara">I.A Yara</option>
-                            <option value="CRM">CRM</option>
-                        </select>
-                    </div>
+                    <div class="input-container"><label>Data Call *</label><input type="datetime-local" id="form-data-reuniao" required></div>
+                    <div class="input-container"><label>Origem</label><select id="form-origem"><option value="I.A Yara">I.A Yara</option><option value="CRM">CRM</option></select></div>
                 </div>
-
                 <div class="form-row-grid">
-                    <div class="input-container">
-                        <label>É o Decisor Final?</label>
-                        <select id="form-decisor">
-                            <option value="Sim">Sim</option>
-                            <option value="Não">Não</option>
-                        </select>
-                    </div>
-                    <div class="input-container">
-                        <label>Status do Diagnóstico / Presença</label>
-                        <select id="form-status-diag">
-                            <option value="Aprovado para Pitch">Aprovado para Pitch</option>
-                            <option value="Reprovado">Reprovado (Não Qualificado)</option>
-                            <option value="No-Show">No-Show (Faltou à reunião)</option>
-                        </select>
-                    </div>
+                    <div class="input-container"><label>Decisor?</label><select id="form-decisor"><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
+                    <div class="input-container"><label>Status Diag.</label><select id="form-status-diag"><option value="Aprovado para Pitch">Aprovado para Pitch</option><option value="Reprovado">Reprovado</option><option value="No-Show">No-Show</option></select></div>
                 </div>
-
                 <div class="form-row-grid">
-                    <div class="input-container">
-                        <label>Houve Pitch de Oferta?</label>
-                        <select id="form-pitch">
-                            <option value="Sim">Sim</option>
-                            <option value="Não">Não</option>
-                        </select>
-                    </div>
-                    <div class="input-container">
-                        <label>Reagendado para 2ª Call?</label>
-                        <select id="form-reagendado">
-                            <option value="Não">Não</option>
-                            <option value="Sim">Sim</option>
-                        </select>
-                    </div>
+                    <div class="input-container"><label>Teve Pitch?</label><select id="form-pitch"><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
+                    <div class="input-container"><label>Reagendou?</label><select id="form-reagendado"><option value="Não">Não</option><option value="Sim">Sim</option></select></div>
                 </div>
-
                 <div class="form-row-grid">
-                    <div class="input-container">
-                        <label>Desfecho Comercial *</label>
-                        <select id="form-desfecho" onchange="window.toggleLossReasonField()" required>
-                            <option value="Em Aberto">Em Aberto</option>
-                            <option value="Fechado">Fechado (Venda Concluída)</option>
-                            <option value="Downsell">Downsell</option>
-                            <option value="Perdido">Perdido</option>
-                        </select>
-                    </div>
-                    <div class="input-container">
-                        <label>Valor do Contrato Fechado (R$)</label>
-                        <input type="number" id="form-valor" step="0.01" value="0" placeholder="Ex: 5000">
-                    </div>
+                    <div class="input-container"><label>Desfecho *</label><select id="form-desfecho" onchange="window.toggleLossReasonField()" required><option value="Em Aberto">Em Aberto</option><option value="Fechado">Fechado</option><option value="Downsell">Downsell</option><option value="Perdido">Perdido</option></select></div>
+                    <div class="input-container"><label>Valor (R$)</label><input type="number" id="form-valor" step="0.01" value="0"></div>
                 </div>
-
                 <div class="form-row-grid">
-                    <div class="input-container">
-                        <label>Data do Pagamento / Pix</label>
-                        <input type="date" id="form-data-pagamento">
-                    </div>
-                    <div class="input-container" id="loss-reason-group" style="display: none;">
-                        <label>Principal Motivo da Perda</label>
-                        <select id="form-motivo-perda">
-                            <option value="Sem Caixa">Sem Caixa / Preço</option>
-                            <option value="Sem Decisor">Sem Decisor na Call</option>
-                            <option value="Não tem o Perfil">Não tem Perfil (Frio)</option>
-                            <option value="Pensar / Sumiu">Pediu pra pensar / Sumiu</option>
-                            <option value="Outro">Outros Motivos</option>
-                        </select>
-                    </div>
+                    <div class="input-container"><label>Data Pag.</label><input type="date" id="form-data-pagamento"></div>
+                    <div class="input-container" id="loss-reason-group" style="display: none;"><label>Motivo Perda</label><select id="form-motivo-perda"><option value="Sem Caixa">Sem Caixa / Preço</option><option value="Sem Decisor">Sem Decisor</option><option value="Não tem o Perfil">Sem Perfil</option><option value="Pensar / Sumiu">Sumiu</option><option value="Outro">Outro</option></select></div>
                 </div>
-
-                <div class="modal-box-actions" style="margin-top:20px;">
+                <div class="modal-box-actions" style="margin-top:15px;">
                     <button type="button" class="btn-secondary" onclick="window.closeLeadModal()">Cancelar</button>
-                    <button type="submit" class="btn-primary">Salvar na Mesa</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
                 </div>
             </form>
         </div>
@@ -339,39 +241,32 @@
         <div class="parhub-modal-box note-box-size">
             <div class="modal-box-header">
                 <div>
-                    <h3 style="margin:0;"><i class="fa-solid fa-comment-dots color-neon"></i> Notas da Call</h3>
-                    <span class="text-muted" style="font-size:12px;" id="modal-lead-name">—</span>
+                    <h3 style="margin:0; font-size:15px;"><i class="fa-solid fa-comment-dots color-neon"></i> Notas da Call</h3>
+                    <span class="text-muted" style="font-size:11px;" id="modal-lead-name">—</span>
                 </div>
                 <button class="modal-close-btn" onclick="window.closeNotesModal()">&times;</button>
             </div>
-            <div style="margin-top:15px;">
-                <textarea id="lead-notes-area" rows="8" class="premium-textarea" placeholder="Cole aqui a transcrição da call..."></textarea>
+            <div style="margin-top:10px;">
+                <textarea id="lead-notes-area" rows="6" class="premium-textarea" placeholder="Anotações ou transcrição..."></textarea>
             </div>
-            <div class="modal-box-actions" style="margin-top:15px;">
+            <div class="modal-box-actions" style="margin-top:10px;">
                 <button class="btn-secondary" onclick="window.closeNotesModal()">Fechar</button>
-                <button class="btn-primary" id="save-notes-btn">Salvar Observações</button>
+                <button class="btn-primary" id="save-notes-btn">Salvar</button>
             </div>
         </div>
     </div>
 
     <div id="calendar-modal" class="parhub-modal-overlay">
-        <div class="parhub-modal-box" style="max-width: 700px;">
+        <div class="parhub-modal-box" style="max-width: 600px;">
             <div class="modal-box-header">
                 <div>
-                    <h3 style="margin:0;"><i class="fa-brands fa-google color-neon"></i> Reuniões da Agenda Google</h3>
-                    <span class="text-muted" style="font-size:12px;">Selecione os compromissos para importar</span>
+                    <h3 style="margin:0; font-size:15px;"><i class="fa-brands fa-google color-neon"></i> Agenda Google</h3>
                 </div>
                 <button class="modal-close-btn" onclick="document.getElementById('calendar-modal').style.display='none'">&times;</button>
             </div>
-            <div class="responsive-table-holder" style="max-height: 400px; margin-top: 15px;">
+            <div class="responsive-table-holder" style="max-height: 350px; margin-top: 10px;">
                 <table class="parhub-premium-table">
-                    <thead>
-                        <tr>
-                            <th>Título do Evento</th>
-                            <th>Data e Hora</th>
-                            <th style="text-align: right;">Ação</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Evento</th><th style="text-align: right;">Ação</th></tr></thead>
                 </table>
                 <div id="calendar-events-list"></div>
             </div>
@@ -382,24 +277,18 @@
     <script>
         function switchTab(event, tabId) {
             event.preventDefault();
-            
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
-
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-content'));
             const targetContent = document.getElementById(tabId);
             if(targetContent) targetContent.classList.add('active-content');
 
             const titleContext = document.getElementById("page-title-context");
-            const subContext = document.querySelector(".sub-context");
-            
             if(tabId === 'overview-insights') {
                 if(titleContext) titleContext.innerText = "Overview & Insights";
-                if(subContext) subContext.innerText = "Métricas avançadas, histogramas de perdas e performance individual do time.";
                 window.dispatchEvent(new CustomEvent('refresh-metrics'));
             } else {
                 if(titleContext) titleContext.innerText = "Mesa de Operações";
-                if(subContext) subContext.innerText = "Controle de tração, fechamentos e auditoria de calls em tempo real.";
             }
         }
     </script>
