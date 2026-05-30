@@ -402,7 +402,6 @@
 
     <script type="module" src="app.js"></script>
     <script>
-        // Sistema básico de troca de abas limpo e sem bugs
         function switchTab(event, tabId) {
             event.preventDefault();
             
@@ -415,17 +414,17 @@
             const targetContent = document.getElementById(tabId);
             if(targetContent) targetContent.classList.add('active-content');
 
-            // Ajusta o texto do Header dinamicamente
+            // Ajusta o texto do Header dinamicamente sem gerar erros
             const titleContext = document.getElementById("page-title-context");
-            const subContext = document.getElementById("sub-context");
+            const subContext = document.querySelector(".sub-context");
+            
             if(tabId === 'overview-insights') {
-                titleContext.innerText = "Overview & Insights";
-                subContext.innerText = "Métricas avançadas, histogramas de perdas e performance individual do time.";
-                // Dispara o evento que o app.js escuta para remontar os gráficos e filtros
+                if(titleContext) titleContext.innerText = "Overview & Insights";
+                if(subContext) subContext.innerText = "Métricas avançadas, histogramas de perdas e performance individual do time.";
                 window.dispatchEvent(new CustomEvent('refresh-metrics'));
             } else {
-                titleContext.innerText = "Mesa de Operações";
-                subContext.innerText = "Controle de tração, fechamentos e auditoria de calls em tempo real.";
+                if(titleContext) titleContext.innerText = "Mesa de Operações";
+                if(subContext) subContext.innerText = "Controle de tração, fechamentos e auditoria de calls em tempo real.";
             }
         }
     </script>

@@ -35,19 +35,11 @@ const leadsCollection = collection(db, "leads");
 let localLeadsCache = [];
 
 // ==========================================================================
-// CONFIGURAÇÕES DA INTEGRAÇÃO GOOGLE CALENDAR (ATUALIZADO COM TOKEN REAL)
+// CONFIGURAÇÕES DA INTEGRAÇÃO GOOGLE CALENDAR (TOKEN REAL FIXADO)
 // ==========================================================================
 const CLIENT_ID = '258420488272-c2emtfbpljfq51kvrlbna83gunrsvsas.apps.googleusercontent.com'; 
 const SCOPES = 'https://www.googleapis.com/auth/calendar.events.readonly';
-
-// ==========================================================================
-// CONFIGURAÇÕES DA INTEGRAÇÃO COOGLE CALENDAR
-// ==========================================================================
-const CLIENT_ID = '366563664458-ap982j8l8m6m7b9m8q7p9r7s8t9u1v2w.apps.googleusercontent.com'; // Gerado no console google associado ao teu app id
-const SCOPES = 'https://www.googleapis.com/auth/calendar.events.readonly';
 let tokenClient;
-let gapiInited = false;
-let gisInited = false;
 
 // ==========================================================================
 // ROTINAS DE INICIALIZAÇÃO E ESCUTA EM TEMPO REAL
@@ -350,7 +342,6 @@ window.calculateAdvancedMetrics = function() {
     let yaraTotal = 0, yaraFechados = 0;
     let crmTotal = 0, crmFechados = 0;
 
-    // Novos acumuladores para o Raio-X do funil
     let funnelTotal = 0;
     let funnelNoShow = 0;
     let funnelQualificados = 0;
@@ -393,7 +384,6 @@ window.calculateAdvancedMetrics = function() {
         }
 
         if (passouFiltroSdr) {
-            // Conta métricas estruturais do funil
             funnelTotal++;
             if (lead.statusDiag === "No-Show") {
                 funnelNoShow++;
@@ -449,7 +439,6 @@ window.calculateAdvancedMetrics = function() {
     if (document.getElementById("sdr-decisor-rate")) document.getElementById("sdr-decisor-rate").innerText = `${txDecisor}%`;
     if (document.getElementById("sdr-decisor-details")) document.getElementById("sdr-decisor-details").innerText = `${totalDecisoresValidados} Presentes / ${totalLeadsComDiag} Reuniões`;
 
-    // Injeta os novos contadores do funil no HTML
     if (document.getElementById("funnel-total")) document.getElementById("funnel-total").innerText = funnelTotal;
     if (document.getElementById("funnel-noshow")) document.getElementById("funnel-noshow").innerText = funnelNoShow;
     if (document.getElementById("funnel-qualificados")) document.getElementById("funnel-qualificados").innerText = funnelQualificados;
@@ -503,20 +492,18 @@ function renderLossHistogram(objetoPerdas) {
 }
 
 // ==========================================================================
-// MOTOR DE INTEGRAÇÃO EXCLUSIVO COM O GOOGLE CALENDAR (ANTI-DUPLICAÇÃO)
+// MOTOR DE INTEGRAÇÃO EXCLUSIVO COM O GOOGLE CALENDAR
 // ==========================================================================
 function gapiLoad() { gapi.load('client', initializeGapiClient); }
 async function initializeGapiClient() {
     await gapi.client.init({ discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"] });
-    gapiInited = true;
 }
 function gisInit() {
     tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: CLIENT_ID,
         scope: SCOPES,
-        callback: '', // Definido dinamicamente na execução
+        callback: '', 
     });
-    gisInited = true;
 }
 
 window.handleAuthClick = function() {
@@ -559,7 +546,6 @@ async function listUpcomingEvents() {
             return;
         }
 
-        // Isola os IDs dos eventos que já estão salvos no Firestore para travar duplicações
         const salvosCalendarIds = localLeadsCache.map(l => l.calendarEventId).filter(id => id);
 
         events.forEach((event) => {
@@ -568,18 +554,15 @@ async function listUpcomingEvents() {
             const dataTexto = dataObjeto.toLocaleDateString('pt-BR') + ' ' + dataObjeto.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
             
             const titulo = event.summary || 'Reunião Sem Título';
-            
-            // Sugere de forma inteligente se o nome contiver gatilhos da agência
             const ehAgenciaRei = titulo.toLowerCase().includes('rei') || titulo.toLowerCase().includes('diagnostico') || titulo.toLowerCase().includes('call');
             const classeLinha = ehAgenciaRei ? 'calendar-import-row suggested' : 'calendar-import-row';
-
             const jaImportado = salvosCalendarIds.includes(event.id);
 
             const div = document.createElement('div');
             div.className = classeLinha;
             div.innerHTML = `
-                <div style="max-width:70%;">
-                    <strong style="font-size:13px; color:var(--text-primary); display:block;">${titulo}</strong>
+                <div style="max-width:70%; display:flex; flex-direction:column; gap:2px; padding:10px 0;">
+                    <strong style="font-size:13px; color:var(--text-primary);">${titulo}</strong>
                     <span style="font-size:11px; color:var(--text-muted);"><i class="fa-solid fa-clock"></i> ${dataTexto}</span>
                 </div>
                 <div>
@@ -603,24 +586,18 @@ window.importEventToForm = function(base64Event) {
     const event = JSON.parse(decodeURIComponent(escape(atob(base64Event))));
     document.getElementById('calendar-modal').style.display = 'none';
     
-    // Abre o formulário limpando os dados antigos e pré-preenchendo com os do calendário
     window.openNewLeadModal();
-    
     document.getElementById('form-nome').value = event.summary || '';
     
     const start = event.start.dateTime || event.start.date;
     if(start) {
-        // Converte para o padrão aceito pelo input datetime-local (YYYY-MM-DDTHH:MM)
         const d = new Date(start);
         const pad = (n) => n.toString().padStart(2, '0');
         const formatoInput = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
         document.getElementById('form-data-reuniao').value = formatoInput;
     }
 
-    // Vincula o ID único do calendário dinamicamente antes de submeter ao Firebase
     const form = document.getElementById('lead-form');
-    
-    // Remove campo antigo se houver para evitar sobreposição
     const antigoIdInput = document.getElementById('form-calendar-id-holder');
     if(antigoIdInput) antigoIdInput.remove();
 
@@ -630,7 +607,6 @@ window.importEventToForm = function(base64Event) {
     hiddenIdInput.value = event.id;
     form.appendChild(hiddenIdInput);
 
-    // Ajusta o comportamento de salvar para incluir o id do calendário
     const originalSubmit = window.handleLeadFormSubmit;
     window.handleLeadFormSubmit = async function(e) {
         e.preventDefault();
@@ -651,7 +627,7 @@ window.importEventToForm = function(base64Event) {
             valor: parseFloat(document.getElementById("form-valor").value || 0),
             dataPagamento: document.getElementById("form-data-pagamento").value,
             motivoPerda: document.getElementById("form-motivo-perda").value,
-            calendarEventId: event.id, // O segredo anti-duplicação salvo na nuvem
+            calendarEventId: event.id, 
             observacoes: id ? (localLeadsCache.find(l => l.id === id)?.observacoes || "") : ""
         };
 
@@ -662,7 +638,6 @@ window.importEventToForm = function(base64Event) {
                 await addDoc(leadsCollection, leadData);
             }
             window.closeLeadModal();
-            // Restaura a função original limpa
             window.handleLeadFormSubmit = originalSubmit;
         } catch (err) {
             console.error(err);
