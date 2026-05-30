@@ -504,3 +504,4 @@ window.importEventToForm = function(base64Event) {
         try { if (id) await updateDoc(doc(db, "leads", id), leadData); else await addDoc(leadsCollection, leadData); window.closeLeadModal(); window.handleLeadFormSubmit = originalSubmit; } catch (err) { console.error(err); }
     };
 };
+.
