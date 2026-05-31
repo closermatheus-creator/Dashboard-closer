@@ -40,10 +40,7 @@ let metasConfig = { metaGeral: 0, supermetaGeral: 0, metas: {} };
 // Lista de closers conhecidos (usada no modal de metas)
 // A Anna pode querer definir meta para closers mesmo antes deles logar
 const CLOSERS_CONHECIDOS = [
-    { email: "anna@agenciarei.com",       nome: "Anna" },
-    { email: "anna.agenciarei@gmail.com", nome: "Anna" },
-    { email: "annatoledo.agenciarei@gmail.com", nome: "Anna Toledo" },
-    { email: "matheusmitt10@gmail.com",   nome: "Matheus Santos (Admin Teste)" }
+    { email: "closermatheus@gmail.com", nome: "Matheus" },
 ];
 
 // CREDENCIAIS DA API GOOGLE CALENDAR
