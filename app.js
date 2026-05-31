@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (loginBtn) {
         loginBtn.onclick = async () => {
             try {
-                aawait signInWithPopup(auth, provider);
+                await signInWithPopup(auth, provider);
             } catch (err) {
                 console.error("Erro no login do Firebase:", err);
                 alert("Erro ao fazer login: " + err.message);
