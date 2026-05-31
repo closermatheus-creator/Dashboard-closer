@@ -10,20 +10,14 @@
 </head>
 <body>
 
-    <!-- ==========================================
-         TELA DE LOGIN REPARADA (ATUALIZE ESTE BLOCO)
-         ========================================== -->
     <div id="login-screen" class="auth-overlay">
         <div class="auth-box">
             <img src="logo.png" alt="Agência Rei" class="auth-logo">
             <h2>Mesa de Operações</h2>
             <p class="text-muted" style="margin-bottom: 15px;">Faça login com sua conta da agência para acessar seus leads.</p>
-            
-            <!-- BOTÃO COM ID E CLASSE INTEGRADOS AO SEU CSS PRESET -->
             <button id="btn-google-login" class="btn-primary" style="width:100%; justify-content:center;">
                 <i class="fa-brands fa-google"></i> Entrar com o Google
             </button>
-            
             <p class="text-muted" style="font-size: 10px; margin-top: 15px; opacity: 0.6;">
                 Acesso restrito para assessores e closers autorizados.
             </p>
@@ -114,9 +108,13 @@
                             <h4 style="margin:0; font-size:13px;" id="insights-panel-title">Inteligência Competitiva</h4>
                         </div>
                     </div>
-                    <div style="display:flex; gap:10px;">
+                    <div style="display:flex; gap:10px; align-items:center;">
                         <button id="btn-export-sheets" class="btn-secondary" style="display:none;" onclick="window.exportToSheetsCSV()">
                             <i class="fa-solid fa-file-excel" style="color:#10B981;"></i> Exportar para Planilha
+                        </button>
+                        <!-- Botão de Metas — só aparece para Anna (controlado pelo JS) -->
+                        <button id="btn-definir-metas" class="btn-secondary" style="display:none;" onclick="window.openMetasModal()">
+                            <i class="fa-solid fa-bullseye" style="color:var(--neon-accent);"></i> Definir Metas
                         </button>
                         <select id="filter-sdr-select" onchange="window.calculateAdvancedMetrics()" class="premium-select-filter">
                             <option value="todos">Todos os SDRs</option>
@@ -124,26 +122,17 @@
                     </div>
                 </div>
 
-                <!-- CARDS DE FATURAMENTO -->
-                <div class="metrics-macro-grid">
-                    <div class="parhub-card metric-card border-purple">
-                        <div class="metric-header"><span>Fat. Semanal</span><i class="fa-solid fa-calendar-week"></i></div>
-                        <h2 id="metrics-week-money">R$ 0,00</h2>
-                        <span class="metric-footer" id="metrics-week-conv">Conversão: 0%</span>
-                    </div>
-                    <div class="parhub-card metric-card border-blue">
-                        <div class="metric-header"><span>Fat. Quinzenal</span><i class="fa-solid fa-calendar-days"></i></div>
-                        <h2 id="metrics-fortnight-money">R$ 0,00</h2>
-                        <span class="metric-footer" id="metrics-fortnight-conv">Conversão: 0%</span>
-                    </div>
-                    <div class="parhub-card metric-card border-neon">
-                        <div class="metric-header"><span>Fat. Mensal</span><i class="fa-solid fa-calendar"></i></div>
-                        <h2 id="metrics-month-money">R$ 0,00</h2>
-                        <span class="metric-footer" id="metrics-month-conv">Conversão: 0%</span>
-                    </div>
+                <!-- ============================================================
+                     BLOCO 1: FATURAMENTO DO MÊS COM BARRA DE PROGRESSO
+                     (substitui os 3 cards semanal/quinzenal/mensal)
+                     ============================================================ -->
+                <div id="billing-month-block" style="margin-bottom:12px;">
+                    <!-- Preenchido dinamicamente pelo JS -->
                 </div>
 
-                <!-- LINHA 1: Faturamento (linha) + Conversão (barras) -->
+                <!-- ============================================================
+                     BLOCO 2: TAXA DE CONVERSÃO GERAL + POR CLOSER
+                     ============================================================ -->
                 <div style="display:grid; grid-template-columns: 1.6fr 1fr; gap:12px; margin-top:12px;">
                     <div class="parhub-card" style="padding:14px;">
                         <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:12px;">
@@ -154,19 +143,49 @@
                             <canvas id="chart-faturamento"></canvas>
                         </div>
                     </div>
+                    <!-- Taxa de conversão: número grande + por closer -->
                     <div class="parhub-card" style="padding:14px;">
                         <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:12px;">
                             <i class="fa-solid fa-percent" style="color:var(--purple-accent);"></i>
-                            <h4 style="margin:0;font-size:11px;font-weight:700;">Taxa de Conversão por Período</h4>
+                            <h4 style="margin:0;font-size:11px;font-weight:700;">Taxa de Conversão do Mês</h4>
                         </div>
-                        <div style="position:relative; height:180px;">
-                            <canvas id="chart-conversao"></canvas>
+                        <div style="text-align:center; margin-bottom:12px;">
+                            <h1 id="conv-geral-numero" style="margin:0; font-size:38px; font-weight:800; color:var(--neon-accent);">0%</h1>
+                            <p style="margin:4px 0 0; font-size:10px; color:var(--text-muted);" id="conv-geral-detalhe">0 fechados / 0 reuniões</p>
                         </div>
+                        <!-- Lista de conversão por closer — preenchida pelo JS -->
+                        <div id="conv-por-closer-lista" style="display:flex;flex-direction:column;gap:5px;"></div>
                     </div>
                 </div>
 
-                <!-- LINHA 2: Funil (rosca) + Origem (rosca) + SDR (barras horiz) -->
-                <div style="display:grid; grid-template-columns: 1fr 1fr 1.2fr; gap:12px; margin-top:12px;">
+                <!-- ============================================================
+                     BLOCO 3: PERFORMANCE POR SDR (Ingrid e Bruno — cards)
+                     ============================================================ -->
+                <div style="margin-top:12px;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;border-left:3px solid var(--warning-clean);padding-left:10px;">
+                        <i class="fa-solid fa-users" style="color:var(--warning-clean);"></i>
+                        <h4 style="margin:0;font-size:12px;font-weight:700;">Performance por SDR</h4>
+                    </div>
+                    <div id="sdr-cards-container" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                        <!-- Preenchido dinamicamente pelo JS -->
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     BLOCO 4: PERFORMANCE POR CLOSER (cards individuais)
+                     ============================================================ -->
+                <div style="margin-top:12px;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;border-left:3px solid var(--purple-accent);padding-left:10px;">
+                        <i class="fa-solid fa-user-tie" style="color:var(--purple-accent);"></i>
+                        <h4 style="margin:0;font-size:12px;font-weight:700;">Performance por Closer</h4>
+                    </div>
+                    <div id="closer-cards-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:12px;">
+                        <!-- Preenchido dinamicamente pelo JS -->
+                    </div>
+                </div>
+
+                <!-- LINHA 2: Funil (rosca) + Origem (rosca) -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
                     <div class="parhub-card" style="padding:14px;">
                         <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:12px;">
                             <i class="fa-solid fa-filter" style="color:var(--blue-accent);"></i>
@@ -201,15 +220,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="parhub-card" style="padding:14px;">
-                        <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:12px;">
-                            <i class="fa-solid fa-users" style="color:var(--warning-clean);"></i>
-                            <h4 style="margin:0;font-size:11px;font-weight:700;">Performance por SDR</h4>
-                        </div>
-                        <div style="position:relative; height:200px;">
-                            <canvas id="chart-sdr"></canvas>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- LINHA 3: Efetividade + Objeções -->
@@ -242,6 +252,9 @@
         </main>
     </div>
 
+    <!-- ============================================================
+         MODAL DE LEAD (existente, mantido igual)
+         ============================================================ -->
     <div id="lead-form-modal" class="parhub-modal-overlay">
         <div class="parhub-modal-box">
             <div class="modal-box-header">
@@ -293,6 +306,7 @@
         </div>
     </div>
 
+    <!-- Modal de Notas -->
     <div id="notes-modal" class="parhub-modal-overlay">
         <div class="parhub-modal-box note-box-size">
             <div class="modal-box-header">
@@ -316,6 +330,7 @@
         </div>
     </div>
 
+    <!-- Modal Google Calendar -->
     <div id="calendar-modal" class="parhub-modal-overlay">
         <div class="parhub-modal-box" style="max-width: 600px;">
             <div class="modal-box-header">
@@ -324,6 +339,46 @@
             </div>
             <div class="responsive-table-holder" style="max-height: 350px; margin-top: 10px;">
                 <div id="calendar-events-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         MODAL DE METAS — SÓ ANNA VÊ (NOVO)
+         ============================================================ -->
+    <div id="metas-modal" class="parhub-modal-overlay">
+        <div class="parhub-modal-box" style="max-width:500px;">
+            <div class="modal-box-header">
+                <h3><i class="fa-solid fa-bullseye" style="color:var(--neon-accent);"></i> Definir Metas do Mês</h3>
+                <button class="modal-close-btn" onclick="window.closeMetasModal()">&times;</button>
+            </div>
+
+            <!-- Metas gerais -->
+            <div style="margin-bottom:14px;">
+                <p style="margin:0 0 8px; font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Metas Gerais da Equipe</p>
+                <div class="form-row-grid">
+                    <div class="input-container">
+                        <label>Meta Geral (R$)</label>
+                        <input type="number" id="meta-geral-input" placeholder="Ex: 50000" step="100">
+                    </div>
+                    <div class="input-container">
+                        <label>Supermeta Geral (R$)</label>
+                        <input type="number" id="supermeta-geral-input" placeholder="Ex: 80000" step="100">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metas por closer — geradas dinamicamente pelo JS -->
+            <div id="metas-por-closer-container">
+                <p style="margin:0 0 8px; font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Metas Individuais por Closer</p>
+                <!-- JS preenche aqui -->
+            </div>
+
+            <div class="modal-box-actions" style="margin-top:15px;">
+                <button class="btn-secondary" onclick="window.closeMetasModal()">Cancelar</button>
+                <button class="btn-primary" onclick="window.saveMetas()">
+                    <i class="fa-solid fa-floppy-disk"></i> Salvar Metas
+                </button>
             </div>
         </div>
     </div>
