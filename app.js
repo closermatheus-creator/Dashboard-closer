@@ -29,8 +29,11 @@ const leadsCollection = collection(db, "leads");
 // VARIÁVEIS DE SESSÃO GLOBAL
 let currentUser = null;
 let isAdmin = false;
+let isSuperAdmin = false; // só annatoledo + matheusmitt10
 let localLeadsCache = [];
+let allLeadsCache = []; // todos os leads (para comparativo admin)
 let firebaseUnsubscribe = null;
+let allLeadsUnsubscribe = null;
 let metasUnsubscribe = null;
 
 // Metas salvas — carregadas do Firebase em tempo real
@@ -84,6 +87,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 user.email === 'annatoledo.agenciarei@gmail.com' || 
                 user.email === 'matheusmitt10@gmail.com'
             );
+            isSuperAdmin = (
+                user.email === 'annatoledo.agenciarei@gmail.com' ||
+                user.email === 'matheusmitt10@gmail.com'
+            );
             
             const nameDisplay = document.getElementById("user-display-name");
             if (nameDisplay) nameDisplay.innerText = user.displayName || user.email;
@@ -123,6 +130,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Inicializa a escuta dos leads
             initRealTimeListener();
+
+            // SuperAdmin: listener separado com TODOS os leads para comparativo
+            if (isSuperAdmin) initAllLeadsListener();
             
             setTimeout(() => {
                 try { gisInit(); gapiLoad(); } catch(e) { }
@@ -131,8 +141,10 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             currentUser = null;
             isAdmin = false;
+            isSuperAdmin = false;
             if (firebaseUnsubscribe) firebaseUnsubscribe();
             if (metasUnsubscribe) metasUnsubscribe();
+            if (allLeadsUnsubscribe) allLeadsUnsubscribe();
             if (document.getElementById("app-layout")) document.getElementById("app-layout").style.display = "none";
             if (document.getElementById("login-screen")) document.getElementById("login-screen").style.display = "flex";
         }
@@ -604,7 +616,7 @@ window.calculateAdvancedMetrics = function() {
     renderSdrCards(sdrStats);
     renderCloserCards(closerStats);
     renderLossHistogram(contagemObjecoes);
-    if (isAdmin) renderComparativo(sdrStats, closerStats);
+    if (isSuperAdmin) renderComparativoFull();
 
     // ── Gráficos (mantidos) ──
     if (typeof window.renderAllCharts === 'function') window.renderAllCharts();
@@ -1124,6 +1136,316 @@ function renderComparativo(sdrStats, closerStats) {
         }
     }
 }
+
+// ==========================================================================
+// LISTENER GLOBAL — TODOS OS LEADS (só SuperAdmin: Anna + matheusmitt10)
+// ==========================================================================
+function initAllLeadsListener() {
+    if (allLeadsUnsubscribe) allLeadsUnsubscribe();
+    const q = query(leadsCollection, orderBy("dataReuniao", "desc"));
+    allLeadsUnsubscribe = onSnapshot(q, (snapshot) => {
+        allLeadsCache = [];
+        snapshot.forEach((d) => allLeadsCache.push({ id: d.id, ...d.data() }));
+        renderComparativoFull();
+    }, (err) => console.warn("Erro allLeads:", err));
+}
+
+// ==========================================================================
+// COMPARATIVO COMPLETO — usa allLeadsCache (todos os leads do banco)
+// CLOSERS FIXOS: Matheus + 2 slots livres
+// SDRs DINÂMICOS: Ingrid, Bruno, Karol e quem mais existir
+// ==========================================================================
+
+// Closers cadastrados — email → nome amigável
+const CLOSERS_MAP = {
+    'closermatheus@gmail.com': 'Matheus',
+    '__slot2__': 'Vaga 2',
+    '__slot3__': 'Vaga 3',
+};
+
+function renderComparativoFull() {
+    const section = document.getElementById("admin-comparativo-section");
+    if (!section || !isSuperAdmin) return;
+    section.style.display = "flex";
+
+    const agora = new Date();
+    const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
+
+    // ── Acumular stats SDR ──
+    const sdrStats = {};
+    // ── Acumular stats Closer ──
+    const closerStats = {};
+
+    allLeadsCache.forEach(lead => {
+        if (!lead.dataReuniao) return;
+        const dataReuniao = new Date(lead.dataReuniao);
+        if (dataReuniao < inicioMes) return;
+
+        const valor = parseFloat(lead.valor || 0);
+        const isFechado = lead.desfecho === "Fechado" || lead.desfecho === "Downsell";
+
+        // SDR stats
+        if (lead.sdr && lead.sdr.trim()) {
+            const sdrNome = lead.sdr.trim();
+            if (!sdrStats[sdrNome]) sdrStats[sdrNome] = { agendadas:0, qualificados:0, aprovadosPitch:0, fechados:0, fat:0 };
+            const ss = sdrStats[sdrNome];
+            ss.agendadas++;
+            if (lead.statusDiag !== "No-Show") ss.qualificados++;
+            if (lead.statusDiag === "Aprovado para Pitch") ss.aprovadosPitch++;
+            if (isFechado) { ss.fechados++; ss.fat += valor; }
+        }
+
+        // Closer stats
+        if (lead.closerEmail) {
+            if (!closerStats[lead.closerEmail]) {
+                closerStats[lead.closerEmail] = {
+                    nome: lead.closerName || lead.closerEmail,
+                    fat:0, total:0, fechados:0, pitches:0, fechadosPitch:0
+                };
+            }
+            const cs = closerStats[lead.closerEmail];
+            cs.total++;
+            if (isFechado) { cs.fat += valor; cs.fechados++; }
+            if (lead.pitch === "Sim") { cs.pitches++; if (isFechado) cs.fechadosPitch++; }
+        }
+    });
+
+    _renderComparativoSDR(sdrStats);
+    _renderComparativoCloser(closerStats);
+}
+
+function _renderComparativoSDR(sdrStats) {
+    const container = document.getElementById("comparativo-sdr-container");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const entries = Object.entries(sdrStats).sort((a, b) => b[1].agendadas - a[1].agendadas);
+
+    if (entries.length === 0) {
+        container.innerHTML = `<p style="font-size:11px;color:var(--text-muted);grid-column:1/-1;padding:8px 0;">Nenhum lead com SDR registrado no mês.</p>`;
+        return;
+    }
+
+    const maxAgendadas = Math.max(...entries.map(([,s]) => s.agendadas), 1);
+    const medals = ['🥇','🥈','🥉'];
+
+    // Identifica se é social seller (Karol) ou SDR normal
+    const SOCIAL_SELLERS = ['karol','carol'];
+
+    entries.forEach(([nome, ss], idx) => {
+        const conv = ss.agendadas > 0 ? Math.round((ss.fechados / ss.agendadas) * 100) : 0;
+        const pitchRate = ss.agendadas > 0 ? Math.round((ss.aprovadosPitch / ss.agendadas) * 100) : 0;
+        const qualRate = ss.agendadas > 0 ? Math.round((ss.qualificados / ss.agendadas) * 100) : 0;
+        const fatFmt = ss.fat.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const barWidth = Math.round((ss.agendadas / maxAgendadas) * 100);
+        const medal = medals[idx] || '';
+        const corConv = conv >= 20 ? 'var(--success-clean)' : conv >= 10 ? 'var(--warning-clean)' : 'var(--danger-clean)';
+        const isSocial = SOCIAL_SELLERS.some(s => nome.toLowerCase().includes(s));
+        const roleLabel = isSocial ? 'Social Seller' : 'SDR';
+        const accentColor = isSocial ? 'var(--neon-accent)' : 'var(--warning-clean)';
+        const accentBg = isSocial ? 'rgba(0,242,254,0.08)' : 'rgba(245,158,11,0.04)';
+        const accentBorder = isSocial ? 'rgba(0,242,254,0.25)' : 'rgba(245,158,11,0.2)';
+        const iconClass = isSocial ? 'fa-solid fa-mobile-screen-button' : 'fa-solid fa-headset';
+
+        const card = document.createElement("div");
+        card.style.cssText = `background:${accentBg};border:1px solid ${accentBorder};border-top:2px solid ${accentColor};border-radius:8px;padding:12px;`;
+        card.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <div style="width:28px;height:28px;border-radius:50%;background:${accentBg};border:1px solid ${accentBorder};display:flex;align-items:center;justify-content:center;">
+                        <i class="${iconClass}" style="color:${accentColor};font-size:11px;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:12px;font-weight:800;">${medal} ${nome}</div>
+                        <div style="font-size:9px;color:var(--text-muted);">${roleLabel} · Mês Atual</div>
+                    </div>
+                </div>
+                <span style="font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;background:${accentBg};color:${accentColor};">#${idx+1}</span>
+            </div>
+
+            <div style="margin-bottom:10px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+                    <span style="font-size:9px;color:var(--text-muted);font-weight:700;">VOLUME AGENDADAS</span>
+                    <span style="font-size:9px;font-weight:800;">${ss.agendadas}</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);border-radius:4px;height:6px;overflow:hidden;">
+                    <div style="width:${barWidth}%;height:100%;background:${accentColor};border-radius:4px;transition:width 0.5s;"></div>
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:10px;">
+                <div style="text-align:center;padding:5px 4px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid var(--border-color);">
+                    <div style="font-size:8px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">Qualif.</div>
+                    <div style="font-size:16px;font-weight:800;color:var(--blue-accent);">${ss.qualificados}</div>
+                    <div style="font-size:8px;color:var(--text-muted);">${qualRate}%</div>
+                </div>
+                <div style="text-align:center;padding:5px 4px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid var(--border-color);">
+                    <div style="font-size:8px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">Pitch</div>
+                    <div style="font-size:16px;font-weight:800;color:var(--success-clean);">${ss.aprovadosPitch}</div>
+                    <div style="font-size:8px;color:var(--text-muted);">${pitchRate}%</div>
+                </div>
+                <div style="text-align:center;padding:5px 4px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid var(--border-color);">
+                    <div style="font-size:8px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">Fechados</div>
+                    <div style="font-size:16px;font-weight:800;color:var(--neon-accent);">${ss.fechados}</div>
+                    <div style="font-size:8px;color:var(--text-muted);">${conv}%</div>
+                </div>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border-color);">
+                <div>
+                    <span style="font-size:8px;color:var(--text-muted);font-weight:700;">CONV. GERAL</span>
+                    <span style="font-size:15px;font-weight:800;margin-left:4px;color:${corConv};">${conv}%</span>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:8px;color:var(--text-muted);font-weight:700;">RECEITA GERADA</div>
+                    <div style="font-size:12px;font-weight:800;color:var(--neon-accent);">${fatFmt}</div>
+                </div>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function _renderComparativoCloser(closerStats) {
+    const container = document.getElementById("comparativo-closer-container");
+    if (!container) return;
+    container.innerHTML = "";
+
+    // Closers fixos: Matheus + 2 slots
+    const FIXED_SLOTS = [
+        { email: 'closermatheus@gmail.com', nome: 'Matheus' },
+        { email: '__slot2__', nome: 'Vaga 2' },
+        { email: '__slot3__', nome: 'Vaga 3' },
+    ];
+
+    // Merge: dados reais sobreescrevem slots
+    const entries = FIXED_SLOTS.map(slot => {
+        const data = closerStats[slot.email];
+        return {
+            email: slot.email,
+            nome: data ? (data.nome.split(' ')[0]) : slot.nome,
+            cs: data || null,
+            isSlot: !data
+        };
+    });
+
+    // Também inclui closers reais não listados nos slots
+    Object.entries(closerStats).forEach(([email, cs]) => {
+        if (!FIXED_SLOTS.find(s => s.email === email)) {
+            entries.push({ email, nome: cs.nome.split(' ')[0], cs, isSlot: false });
+        }
+    });
+
+    const maxFat = Math.max(...entries.filter(e => e.cs).map(e => e.cs.fat), 1);
+    const medals = ['🥇','🥈','🥉'];
+    // Ordena por faturamento (slots vão pro fim)
+    entries.sort((a, b) => {
+        if (!a.cs && !b.cs) return 0;
+        if (!a.cs) return 1;
+        if (!b.cs) return -1;
+        return b.cs.fat - a.cs.fat;
+    });
+
+    entries.forEach((entry, idx) => {
+        const card = document.createElement("div");
+
+        if (entry.isSlot) {
+            // Card vazio para vaga
+            card.style.cssText = "background:rgba(255,255,255,0.01);border:1px dashed var(--border-color);border-radius:8px;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;gap:8px;";
+            card.innerHTML = `
+                <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.03);border:1px dashed var(--border-color);display:flex;align-items:center;justify-content:center;">
+                    <i class="fa-solid fa-user-plus" style="color:var(--border-color);font-size:14px;"></i>
+                </div>
+                <div style="text-align:center;">
+                    <div style="font-size:11px;font-weight:700;color:var(--border-color);">${entry.nome}</div>
+                    <div style="font-size:9px;color:var(--border-color);margin-top:2px;">Closer · Aguardando</div>
+                </div>
+            `;
+        } else {
+            const cs = entry.cs;
+            const conv = cs.total > 0 ? Math.round((cs.fechados / cs.total) * 100) : 0;
+            const pitchConv = cs.pitches > 0 ? Math.round((cs.fechadosPitch / cs.pitches) * 100) : 0;
+            const fatFmt = cs.fat.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const barWidth = maxFat > 0 ? Math.round((cs.fat / maxFat) * 100) : 0;
+            const medal = medals[idx] || '';
+            const metaInd = metasConfig.metas?.[entry.email]?.meta || 0;
+            const supermetaInd = metasConfig.metas?.[entry.email]?.supermeta || 0;
+            const pctMeta = metaInd > 0 ? Math.min(Math.round((cs.fat / metaInd) * 100), 100) : null;
+            const pctSuper = supermetaInd > 0 ? Math.min(Math.round((cs.fat / supermetaInd) * 100), 100) : null;
+            const corConv = conv >= 30 ? 'var(--success-clean)' : conv >= 15 ? 'var(--warning-clean)' : 'var(--danger-clean)';
+
+            card.style.cssText = "background:rgba(124,58,237,0.04);border:1px solid rgba(124,58,237,0.2);border-top:2px solid var(--purple-accent);border-radius:8px;padding:12px;";
+            card.innerHTML = `
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <div style="width:28px;height:28px;border-radius:50%;background:rgba(124,58,237,0.15);display:flex;align-items:center;justify-content:center;">
+                            <i class="fa-solid fa-user-tie" style="color:var(--purple-accent);font-size:11px;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:12px;font-weight:800;">${medal} ${entry.nome}</div>
+                            <div style="font-size:9px;color:var(--text-muted);">Closer · Mês Atual</div>
+                        </div>
+                    </div>
+                    <span style="font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;background:rgba(124,58,237,0.1);color:var(--purple-accent);">#${idx+1}</span>
+                </div>
+
+                <div style="margin-bottom:10px;">
+                    <div style="font-size:9px;color:var(--text-muted);font-weight:700;margin-bottom:2px;">FATURAMENTO</div>
+                    <div style="font-size:20px;font-weight:800;color:var(--neon-accent);line-height:1.1;margin-bottom:5px;">${fatFmt}</div>
+                    <div style="background:rgba(255,255,255,0.04);border-radius:4px;height:6px;overflow:hidden;">
+                        <div style="width:${barWidth}%;height:100%;background:linear-gradient(90deg,var(--neon-accent),var(--purple-accent));border-radius:4px;transition:width 0.5s;"></div>
+                    </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:10px;">
+                    <div style="text-align:center;padding:5px 4px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid var(--border-color);">
+                        <div style="font-size:8px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">Reuniões</div>
+                        <div style="font-size:16px;font-weight:800;">${cs.total}</div>
+                    </div>
+                    <div style="text-align:center;padding:5px 4px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid var(--border-color);">
+                        <div style="font-size:8px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">Fechados</div>
+                        <div style="font-size:16px;font-weight:800;color:var(--success-clean);">${cs.fechados}</div>
+                    </div>
+                    <div style="text-align:center;padding:5px 4px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid var(--border-color);">
+                        <div style="font-size:8px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">Conv. Pitch</div>
+                        <div style="font-size:16px;font-weight:800;color:var(--blue-accent);">${pitchConv}%</div>
+                    </div>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid var(--border-color);${pctMeta !== null ? 'border-bottom:1px solid var(--border-color);margin-bottom:8px;' : ''}">
+                    <div>
+                        <span style="font-size:8px;color:var(--text-muted);font-weight:700;">CONVERSÃO</span>
+                        <span style="font-size:15px;font-weight:800;margin-left:4px;color:${corConv};">${conv}%</span>
+                    </div>
+                    <div style="font-size:8px;color:var(--text-muted);">${cs.pitches} pitches</div>
+                </div>
+
+                ${pctMeta !== null ? `
+                <div style="margin-top:4px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:2px;">
+                        <span style="font-size:8px;color:var(--text-muted);font-weight:700;">META</span>
+                        <span style="font-size:8px;font-weight:800;color:var(--neon-accent);">${pctMeta}%</span>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);border-radius:3px;height:5px;overflow:hidden;">
+                        <div style="width:${pctMeta}%;height:100%;background:var(--neon-accent);border-radius:3px;"></div>
+                    </div>
+                </div>` : ''}
+                ${pctSuper !== null ? `
+                <div style="margin-top:4px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:2px;">
+                        <span style="font-size:8px;color:var(--text-muted);font-weight:700;">SUPERMETA</span>
+                        <span style="font-size:8px;font-weight:800;color:var(--purple-accent);">${pctSuper}%</span>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);border-radius:3px;height:5px;overflow:hidden;">
+                        <div style="width:${pctSuper}%;height:100%;background:var(--purple-accent);border-radius:3px;"></div>
+                    </div>
+                </div>` : ''}
+            `;
+        }
+        container.appendChild(card);
+    });
+}
+
 
 // ==========================================================================
 // HISTOGRAMA DE OBJEÇÕES (mantido igual)
