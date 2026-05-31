@@ -75,8 +75,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Trata o retorno do redirect de login
-    getRedirectResult(auth).catch((err) => {
-        console.error("Erro no redirect do Firebase:", err);
+    getRedirectResult(auth).then((result) => {
+    if (result?.user) {
+        console.log("Login via redirect OK:", result.user.email);
+    }
+    }).catch((err) => {
+        console.error("Erro no redirect:", err);
     });
 
     onAuthStateChanged(auth, (user) => {
