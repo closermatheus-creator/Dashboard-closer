@@ -72,8 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (user) {
             console.log("Usuário autenticado com sucesso:", user.email);
             currentUser = user;
-            // Define quem é administrador (Adicionei o e-mail oficial da Anna e o seu para teste)
-            isAdmin = (user.email === 'anna@agenciarei.com' || user.email === 'annatoledo.agenciarei@gmail.com' || user.email === 'SEU_EMAIL_AQUI@gmail.com');
+            isAdmin = (user.email === 'anna@agenciarei.com' || user.email === 'anna.agenciarei@gmail.com');
             
             const nameDisplay = document.getElementById("user-display-name");
             if (nameDisplay) nameDisplay.innerText = user.displayName || user.email;
@@ -441,6 +440,9 @@ window.calculateAdvancedMetrics = function() {
     if (document.getElementById("channel-crm-rate")) document.getElementById("channel-crm-rate").innerText = `${crmTotal > 0 ? Math.round((crmFechados / crmTotal) * 100) : 0}%`;
 
     renderLossHistogram(contagemObjecoes);
+
+    // Atualiza os gráficos
+    if (typeof window.renderAllCharts === 'function') window.renderAllCharts();
 };
 
 function renderLossHistogram(objetoPerdas) {
@@ -543,4 +545,198 @@ window.importEventToForm = function(base64Event) {
         };
         try { if (id) await updateDoc(doc(db, "leads", id), leadData); else await addDoc(leadsCollection, leadData); window.closeLeadModal(); window.handleLeadFormSubmit = originalSubmit; } catch (err) { console.error(err); }
     };
+};
+
+// ==========================================================================
+// ENGINE DE GRÁFICOS — CHART.JS
+// ==========================================================================
+const chartInstances = {};
+
+function destroyChart(id) {
+    if (chartInstances[id]) {
+        chartInstances[id].destroy();
+        delete chartInstances[id];
+    }
+}
+
+const CHART_DEFAULTS = {
+    color: '#9CA3AF',
+    borderColor: '#1F2937',
+    plugins: {
+        legend: { labels: { color: '#9CA3AF', font: { size: 10, family: 'Plus Jakarta Sans' }, boxWidth: 10 } },
+        tooltip: { backgroundColor: '#111827', titleColor: '#F3F4F6', bodyColor: '#9CA3AF', borderColor: '#1F2937', borderWidth: 1 }
+    }
+};
+
+window.renderAllCharts = function() {
+    if (typeof Chart === 'undefined') return;
+
+    const agora = new Date();
+
+    // ── 1. FATURAMENTO AO LONGO DO TEMPO (linha — últimos 6 meses) ──
+    const mesesLabels = [];
+    const mesesFaturamento = [];
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(agora.getFullYear(), agora.getMonth() - i, 1);
+        mesesLabels.push(d.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }));
+        const fat = localLeadsCache
+            .filter(l => {
+                if (!l.dataReuniao) return false;
+                const dr = new Date(l.dataReuniao);
+                return dr.getMonth() === d.getMonth() && dr.getFullYear() === d.getFullYear()
+                    && (l.desfecho === 'Fechado' || l.desfecho === 'Downsell');
+            })
+            .reduce((acc, l) => acc + parseFloat(l.valor || 0), 0);
+        mesesFaturamento.push(fat);
+    }
+    destroyChart('faturamento');
+    const ctxFat = document.getElementById('chart-faturamento');
+    if (ctxFat) {
+        chartInstances['faturamento'] = new Chart(ctxFat, {
+            type: 'line',
+            data: {
+                labels: mesesLabels,
+                datasets: [{
+                    label: 'Faturamento (R$)',
+                    data: mesesFaturamento,
+                    borderColor: '#00F2FE',
+                    backgroundColor: 'rgba(0,242,254,0.08)',
+                    pointBackgroundColor: '#00F2FE',
+                    pointRadius: 4,
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    x: { ticks: { color: '#9CA3AF', font: { size: 9 } }, grid: { color: '#1F2937' } },
+                    y: { ticks: { color: '#9CA3AF', font: { size: 9 }, callback: v => 'R$' + (v/1000).toFixed(0) + 'k' }, grid: { color: '#1F2937' } }
+                },
+                plugins: { ...CHART_DEFAULTS.plugins, legend: { display: false } }
+            }
+        });
+    }
+
+    // ── 2. TAXA DE CONVERSÃO POR PERÍODO (barras) ──
+    const periodos = ['Semana', 'Quinzena', 'Mês'];
+    const inicioSemana = new Date(agora); inicioSemana.setDate(agora.getDate() - 7);
+    const inicioQuinzena = new Date(agora); inicioQuinzena.setDate(agora.getDate() - 15);
+    const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
+    const convRates = [inicioSemana, inicioQuinzena, inicioMes].map(inicio => {
+        const filtrados = localLeadsCache.filter(l => l.dataReuniao && new Date(l.dataReuniao) >= inicio);
+        const fechados = filtrados.filter(l => l.desfecho === 'Fechado' || l.desfecho === 'Downsell').length;
+        return filtrados.length > 0 ? Math.round((fechados / filtrados.length) * 100) : 0;
+    });
+    destroyChart('conversao');
+    const ctxConv = document.getElementById('chart-conversao');
+    if (ctxConv) {
+        chartInstances['conversao'] = new Chart(ctxConv, {
+            type: 'bar',
+            data: {
+                labels: periodos,
+                datasets: [{
+                    label: 'Conversão %',
+                    data: convRates,
+                    backgroundColor: ['rgba(124,58,237,0.7)', 'rgba(59,130,246,0.7)', 'rgba(0,242,254,0.7)'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    x: { ticks: { color: '#9CA3AF', font: { size: 10 } }, grid: { color: '#1F2937' } },
+                    y: { max: 100, ticks: { color: '#9CA3AF', font: { size: 9 }, callback: v => v + '%' }, grid: { color: '#1F2937' } }
+                },
+                plugins: { ...CHART_DEFAULTS.plugins, legend: { display: false } }
+            }
+        });
+    }
+
+    // ── 3. FUNIL DE VENDAS (rosca) ──
+    const funnelData = [
+        localLeadsCache.filter(l => l.statusDiag === 'No-Show').length,
+        localLeadsCache.filter(l => l.statusDiag === 'Aprovado para Pitch').length,
+        localLeadsCache.filter(l => l.statusDiag?.includes('Reprovado') || l.statusDiag?.includes('Qualificado')).length,
+        localLeadsCache.filter(l => l.desfecho === 'Fechado').length,
+    ];
+    destroyChart('funil');
+    const ctxFunil = document.getElementById('chart-funil');
+    if (ctxFunil) {
+        chartInstances['funil'] = new Chart(ctxFunil, {
+            type: 'doughnut',
+            data: {
+                labels: ['No-Show', 'Pitch', 'Reprovado', 'Fechado'],
+                datasets: [{
+                    data: funnelData,
+                    backgroundColor: ['#EF4444', '#3B82F6', '#F59E0B', '#10B981'],
+                    borderColor: '#111827', borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '65%',
+                plugins: { ...CHART_DEFAULTS.plugins }
+            }
+        });
+    }
+
+    // ── 4. LEADS POR ORIGEM (rosca) ──
+    const yaraCount = localLeadsCache.filter(l => l.origem === 'I.A Yara').length;
+    const crmCount = localLeadsCache.filter(l => l.origem === 'CRM').length;
+    destroyChart('origem');
+    const ctxOrigem = document.getElementById('chart-origem');
+    if (ctxOrigem) {
+        chartInstances['origem'] = new Chart(ctxOrigem, {
+            type: 'doughnut',
+            data: {
+                labels: ['I.A Yara', 'CRM'],
+                datasets: [{
+                    data: [yaraCount, crmCount],
+                    backgroundColor: ['rgba(59,130,246,0.8)', 'rgba(124,58,237,0.8)'],
+                    borderColor: '#111827', borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '65%',
+                plugins: { ...CHART_DEFAULTS.plugins }
+            }
+        });
+    }
+
+    // ── 5. PERFORMANCE POR SDR (barras horizontais) ──
+    const sdrMap = {};
+    localLeadsCache.forEach(l => {
+        if (!l.sdr || !l.sdr.trim()) return;
+        const nome = l.sdr.trim();
+        if (!sdrMap[nome]) sdrMap[nome] = { total: 0, fechados: 0 };
+        sdrMap[nome].total++;
+        if (l.desfecho === 'Fechado' || l.desfecho === 'Downsell') sdrMap[nome].fechados++;
+    });
+    const sdrNomes = Object.keys(sdrMap);
+    const sdrTaxas = sdrNomes.map(n => sdrMap[n].total > 0 ? Math.round((sdrMap[n].fechados / sdrMap[n].total) * 100) : 0);
+    destroyChart('sdr');
+    const ctxSdr = document.getElementById('chart-sdr');
+    if (ctxSdr) {
+        chartInstances['sdr'] = new Chart(ctxSdr, {
+            type: 'bar',
+            data: {
+                labels: sdrNomes.length > 0 ? sdrNomes : ['Sem dados'],
+                datasets: [{
+                    label: 'Conversão %',
+                    data: sdrTaxas.length > 0 ? sdrTaxas : [0],
+                    backgroundColor: 'rgba(245,158,11,0.7)',
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    x: { max: 100, ticks: { color: '#9CA3AF', font: { size: 9 }, callback: v => v + '%' }, grid: { color: '#1F2937' } },
+                    y: { ticks: { color: '#9CA3AF', font: { size: 10 } }, grid: { color: '#1F2937' } }
+                },
+                plugins: { ...CHART_DEFAULTS.plugins, legend: { display: false } }
+            }
+        });
+    }
 };

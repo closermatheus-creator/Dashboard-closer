@@ -59,9 +59,8 @@
                 </button>
                 
                 <div class="user-profile-menu">
-                    <div class="user-avatar-small" style="overflow:hidden; padding:0;">
-                        <img id="user-display-photo" src="" alt="Foto" style="display:none; width:26px; height:26px; border-radius:50%; object-fit:cover;">
-                        <i id="user-default-avatar" class="fa-solid fa-user-tie"></i>
+                    <div class="user-avatar-small">
+                        <i class="fa-solid fa-user-tie"></i>
                     </div>
                     <span id="user-display-name" style="font-weight:600; font-size:11px; margin-left:4px;">...</span>
                     <button id="btn-logout" title="Sair do Sistema" style="background:none; border:none; color:var(--danger-clean); cursor:pointer; font-size:12px; margin-left:6px;"><i class="fa-solid fa-right-from-bracket"></i></button>
@@ -125,67 +124,118 @@
                     </div>
                 </div>
 
+                <!-- CARDS DE FATURAMENTO -->
                 <div class="metrics-macro-grid">
                     <div class="parhub-card metric-card border-purple">
-                        <div class="metric-header"><span>Fat. Semanal</span><i class="fa-solid fa-calendar-week icon-box-purple"></i></div>
+                        <div class="metric-header"><span>Fat. Semanal</span><i class="fa-solid fa-calendar-week"></i></div>
                         <h2 id="metrics-week-money">R$ 0,00</h2>
                         <span class="metric-footer" id="metrics-week-conv">Conversão: 0%</span>
                     </div>
                     <div class="parhub-card metric-card border-blue">
-                        <div class="metric-header"><span>Fat. Quinzenal</span><i class="fa-solid fa-calendar-days icon-box-blue"></i></div>
+                        <div class="metric-header"><span>Fat. Quinzenal</span><i class="fa-solid fa-calendar-days"></i></div>
                         <h2 id="metrics-fortnight-money">R$ 0,00</h2>
                         <span class="metric-footer" id="metrics-fortnight-conv">Conversão: 0%</span>
                     </div>
                     <div class="parhub-card metric-card border-neon">
-                        <div class="metric-header"><span>Fat. Mensal</span><i class="fa-solid fa-calendar-star icon-box-neon"></i></div>
+                        <div class="metric-header"><span>Fat. Mensal</span><i class="fa-solid fa-calendar"></i></div>
                         <h2 id="metrics-month-money">R$ 0,00</h2>
                         <span class="metric-footer" id="metrics-month-conv">Conversão: 0%</span>
                     </div>
                 </div>
 
-                <div class="analytics-row-grid">
-                    <div class="parhub-card intelligence-card">
-                        <div class="intel-header"><i class="fa-solid fa-bullseye"></i><h4>Efetividade de Pitch</h4></div>
-                        <div class="intel-body-large">
-                            <h1 id="sdr-pitch-rate">0%</h1>
-                            <p id="sdr-pitch-details" class="text-muted">0 Fechados / 0 Pitches</p>
+                <!-- LINHA 1: Faturamento (linha) + Conversão (barras) -->
+                <div style="display:grid; grid-template-columns: 1.6fr 1fr; gap:12px; margin-top:12px;">
+                    <div class="parhub-card" style="padding:14px;">
+                        <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:12px;">
+                            <i class="fa-solid fa-chart-line" style="color:var(--neon-accent);"></i>
+                            <h4 style="margin:0;font-size:11px;font-weight:700;">Faturamento ao Longo do Tempo</h4>
+                        </div>
+                        <div style="position:relative; height:180px;">
+                            <canvas id="chart-faturamento"></canvas>
                         </div>
                     </div>
-                    <div class="parhub-card intelligence-card">
-                        <div class="intel-header"><i class="fa-solid fa-user-check"></i><h4>Presença Decisores</h4></div>
-                        <div class="intel-body-large">
-                            <h1 id="sdr-decisor-rate">0%</h1>
-                            <p id="sdr-decisor-details" class="text-muted">0 Presentes / 0 Reuniões</p>
+                    <div class="parhub-card" style="padding:14px;">
+                        <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:12px;">
+                            <i class="fa-solid fa-percent" style="color:var(--purple-accent);"></i>
+                            <h4 style="margin:0;font-size:11px;font-weight:700;">Taxa de Conversão por Período</h4>
                         </div>
-                    </div>
-                    <div class="parhub-card intelligence-card">
-                        <div class="intel-header"><i class="fa-solid fa-filter"></i><h4>Raio-X do Funil (SDR Quality)</h4></div>
-                        <div class="channel-list-wrapper" style="margin-top: 10px;">
-                            <div class="channel-item"><span>Total Agendadas:</span><strong id="funnel-total">0</strong></div>
-                            <div class="channel-item"><span>No-Shows (Bolo):</span><strong style="color: var(--danger-clean);" id="funnel-noshow">0</strong></div>
-                            <div class="channel-item"><span>Aprovados Diag (Pitch):</span><strong style="color: var(--success-clean);" id="funnel-qualificados">0</strong></div>
-                            <div class="channel-item"><span>Reprovados Diag (Sem Fit):</span><strong style="color: var(--warning-clean);" id="funnel-reprovados">0</strong></div>
+                        <div style="position:relative; height:180px;">
+                            <canvas id="chart-conversao"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <div class="analytics-row-grid" style="margin-top: 15px;">
-                    <div class="parhub-card intelligence-card">
-                        <div class="intel-header"><i class="fa-solid fa-chart-line"></i><h4>Canais (Origem)</h4></div>
-                        <div class="channel-list-wrapper">
+                <!-- LINHA 2: Funil (rosca) + Origem (rosca) + SDR (barras horiz) -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1.2fr; gap:12px; margin-top:12px;">
+                    <div class="parhub-card" style="padding:14px;">
+                        <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:12px;">
+                            <i class="fa-solid fa-filter" style="color:var(--blue-accent);"></i>
+                            <h4 style="margin:0;font-size:11px;font-weight:700;">Funil de Vendas</h4>
+                        </div>
+                        <div style="position:relative; height:160px;">
+                            <canvas id="chart-funil"></canvas>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:3px;margin-top:10px;">
+                            <div class="channel-item"><span>Total Agendadas:</span><strong id="funnel-total">0</strong></div>
+                            <div class="channel-item"><span>No-Shows:</span><strong style="color:var(--danger-clean);" id="funnel-noshow">0</strong></div>
+                            <div class="channel-item"><span>Aprovados Pitch:</span><strong style="color:var(--success-clean);" id="funnel-qualificados">0</strong></div>
+                            <div class="channel-item"><span>Reprovados:</span><strong style="color:var(--warning-clean);" id="funnel-reprovados">0</strong></div>
+                        </div>
+                    </div>
+                    <div class="parhub-card" style="padding:14px;">
+                        <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:12px;">
+                            <i class="fa-solid fa-chart-pie" style="color:var(--neon-accent);"></i>
+                            <h4 style="margin:0;font-size:11px;font-weight:700;">Leads por Origem</h4>
+                        </div>
+                        <div style="position:relative; height:160px;">
+                            <canvas id="chart-origem"></canvas>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:3px;margin-top:10px;">
                             <div class="channel-item">
-                                <div style="display:flex; align-items:center; gap:6px;"><span class="dot-indicator bg-blue"></span><span>I.A Yara</span></div>
+                                <div style="display:flex;align-items:center;gap:6px;"><span class="dot-indicator bg-blue"></span><span>I.A Yara</span></div>
                                 <strong id="channel-yara-rate">0%</strong>
                             </div>
                             <div class="channel-item">
-                                <div style="display:flex; align-items:center; gap:6px;"><span class="dot-indicator bg-purple"></span><span>CRM Próprio</span></div>
+                                <div style="display:flex;align-items:center;gap:6px;"><span class="dot-indicator bg-purple"></span><span>CRM</span></div>
                                 <strong id="channel-crm-rate">0%</strong>
                             </div>
                         </div>
                     </div>
-                    <div class="parhub-card intelligence-card" style="grid-column: span 2;">
-                        <div class="intel-header"><i class="fa-solid fa-chart-bar"></i><h4>Mapa de Objeções & Perdas</h4></div>
-                        <div class="rk-histogram-container" id="loss-reasons-container"></div>
+                    <div class="parhub-card" style="padding:14px;">
+                        <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:12px;">
+                            <i class="fa-solid fa-users" style="color:var(--warning-clean);"></i>
+                            <h4 style="margin:0;font-size:11px;font-weight:700;">Performance por SDR</h4>
+                        </div>
+                        <div style="position:relative; height:200px;">
+                            <canvas id="chart-sdr"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LINHA 3: Efetividade + Objeções -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
+                    <div class="parhub-card" style="padding:14px;">
+                        <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:8px;">
+                            <i class="fa-solid fa-bullseye"></i><h4 style="margin:0;font-size:11px;font-weight:700;">Efetividade de Pitch & Decisores</h4>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
+                            <div style="text-align:center;">
+                                <div style="font-size:9px;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Taxa de Pitch</div>
+                                <h1 id="sdr-pitch-rate" style="margin:4px 0 1px;font-size:22px;font-weight:800;">0%</h1>
+                                <p id="sdr-pitch-details" style="margin:0;font-size:9px;color:var(--text-muted);">0 Fechados / 0 Pitches</p>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="font-size:9px;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Presença Decisor</div>
+                                <h1 id="sdr-decisor-rate" style="margin:4px 0 1px;font-size:22px;font-weight:800;">0%</h1>
+                                <p id="sdr-decisor-details" style="margin:0;font-size:9px;color:var(--text-muted);">0 Presentes / 0 Reuniões</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="parhub-card" style="padding:14px;">
+                        <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:8px;">
+                            <i class="fa-solid fa-chart-bar"></i><h4 style="margin:0;font-size:11px;font-weight:700;">Mapa de Objeções & Perdas</h4>
+                        </div>
+                        <div class="rk-histogram-container" id="loss-reasons-container" style="margin-top:8px;"></div>
                     </div>
                 </div>
             </section>
@@ -278,22 +328,15 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script async defer src="https://apis.google.com/js/api.js"></script>
     <script async defer src="https://accounts.google.com/gsi/client"></script>
     <script>
         function switchTab(event, tabId) {
             event.preventDefault();
-            // Esconde todas as abas
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active-content');
-            });
-            // Remove active de todos os botões
-            document.querySelectorAll('.menu-item').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            // Mostra a aba clicada
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-content'));
+            document.querySelectorAll('.menu-item').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active-content');
-            // Marca o botão como active
             event.currentTarget.classList.add('active');
         }
     </script>
