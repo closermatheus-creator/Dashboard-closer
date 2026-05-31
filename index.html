@@ -59,7 +59,7 @@
                 </button>
                 
                 <div class="user-profile-menu">
-                    <div class="user-avatar-small">
+                    <div class="user-avatar-small" style="overflow:hidden; padding:0;">
                         <img id="user-display-photo" src="" alt="Foto" style="display:none; width:26px; height:26px; border-radius:50%; object-fit:cover;">
                         <i id="user-default-avatar" class="fa-solid fa-user-tie"></i>
                     </div>
@@ -280,6 +280,23 @@
 
     <script async defer src="https://apis.google.com/js/api.js"></script>
     <script async defer src="https://accounts.google.com/gsi/client"></script>
+    <script>
+        function switchTab(event, tabId) {
+            event.preventDefault();
+            // Esconde todas as abas
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active-content');
+            });
+            // Remove active de todos os botões
+            document.querySelectorAll('.menu-item').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // Mostra a aba clicada
+            document.getElementById(tabId).classList.add('active-content');
+            // Marca o botão como active
+            event.currentTarget.classList.add('active');
+        }
+    </script>
     <script type="module" src="app.js"></script>
 </body>
 </html>
