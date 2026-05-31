@@ -11,15 +11,9 @@
 <body>
 
     <!-- ==========================================
-         TELA DE LOGIN REPARADA (ATUALIZE ESTE BLOCO)
+         TELA DE LOGIN REPARADA (TAGS DUPLICADAS REMOVIDAS)
          ========================================== -->
     <div id="login-screen" class="auth-overlay">
-        <div class="auth-box">
-            <img src="logo.png" alt="Agência Rei" class="auth-logo">
-            <h2>Mesa de Operações</h2>
-            <p class="text-muted" style="margin-bottom: 15px;">Faça login com sua conta da agência para acessar seus leads.</p>
-            
- <div id="login-screen" class="auth-overlay">
         <div class="auth-box">
             <img src="logo.png" alt="Agência Rei" class="auth-logo">
             <h2>Mesa de Operações</h2>
@@ -35,6 +29,9 @@
         </div>
     </div>
 
+    <!-- ==========================================
+         LAYOUT PRINCIPAL DO APP
+         ========================================== -->
     <div id="app-layout" style="display: none;">
         
         <header class="main-top-navbar">
@@ -203,6 +200,7 @@
         </main>
     </div>
 
+    <!-- MODAL DE LEADS -->
     <div id="lead-form-modal" class="parhub-modal-overlay">
         <div class="parhub-modal-box">
             <div class="modal-box-header">
@@ -254,6 +252,7 @@
         </div>
     </div>
 
+    <!-- MODAL DE NOTAS -->
     <div id="notes-modal" class="parhub-modal-overlay">
         <div class="parhub-modal-box note-box-size">
             <div class="modal-box-header">
@@ -277,6 +276,7 @@
         </div>
     </div>
 
+    <!-- MODAL CALENDÁRIO -->
     <div id="calendar-modal" class="parhub-modal-overlay">
         <div class="parhub-modal-box" style="max-width: 600px;">
             <div class="modal-box-header">
@@ -289,35 +289,25 @@
         </div>
     </div>
 
+    <!-- SCRIPTS CORE -->
     <script async defer src="https://apis.google.com/js/api.js"></script>
     <script async defer src="https://accounts.google.com/gsi/client"></script>
     <script type="module" src="app.js"></script>
     <script>
         function switchTab(event, tabId) {
-            // Evita que a página recarregue ou role para o topo ao clicar
             event.preventDefault();
-            
-            // 1. Remove a classe 'active' de todos os botões do menu superior
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-            
-            // 2. Adiciona a classe 'active' apenas no botão que foi clicado
             event.currentTarget.classList.add('active');
-            
-            // 3. Esconde todos os blocos de conteúdo de telas (.tab-content)
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-content'));
             
-            // 4. Mostra o bloco de conteúdo correspondente à aba clicada (Mesa ou Insights)
             const targetContent = document.getElementById(tabId);
             if (targetContent) {
                 targetContent.classList.add('active-content');
             }
 
-            // 5. Atualiza o título dinâmico na barra superior e dispara as métricas
             const titleContext = document.getElementById("page-title-context");
             if (tabId === 'overview-insights') {
                 if (titleContext) titleContext.innerText = "Overview & Insights";
-                
-                // Esse é o gatilho mágico que avisa o app.js para calcular o faturamento e atualizar os cards
                 console.log("Disparando atualização de métricas...");
                 window.dispatchEvent(new CustomEvent('refresh-metrics'));
             } else {
