@@ -75,7 +75,10 @@ body {
 .btn-secondary:hover { color: var(--text-primary); border-color: var(--text-primary); }
 
 .user-profile-menu { display: flex; align-items: center; gap: 4px; border-left: 1px solid var(--border-color); padding-left: 10px; margin-left: 4px; }
-.user-avatar-small { width: 26px; height: 26px; border-radius: 50%; background-color: var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 11px; }
+.user-avatar-small { width: 26px; height: 26px; border-radius: 50%; background-color: var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 11px; overflow: hidden; flex-shrink: 0; }
+.user-avatar-small img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; display: none; }
+.user-avatar-small.has-photo i { display: none; }
+.user-avatar-small.has-photo img { display: block; }
 
 /* CONTEÚDO */
 .parhub-main-content { padding: 16px; max-width: 100%; margin: 0 auto; }
@@ -155,3 +158,14 @@ body {
 
 .calendar-import-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-bottom: 1px solid var(--border-color); font-size: 11px; }
 .calendar-import-row.suggested { background-color: rgba(0, 242, 254, 0.01); }
+
+/* FIX: Insights section scroll + card alignment */
+#overview-insights {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+#sdr-cards-container > .parhub-card,
+#closer-cards-container > .parhub-card {
+    height: auto !important;
+    min-height: 0 !important;
+}
