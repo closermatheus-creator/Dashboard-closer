@@ -39,25 +39,36 @@ let tokenClient;
 // ==========================================================================
 // CENTRAL DE AUTENTICAÇÃO E CONTROLE DE TRAVA DE SESSÃO
 // ==========================================================================
-// ==========================================================================
-// CENTRAL DE AUTENTICAÇÃO E CONTROLE DE TRAVA DE SESSÃO
-// ==========================================================================
 document.addEventListener("DOMContentLoaded", () => {
-    // Adiciona uma verificação segura para garantir que o botão existe antes de aplicar o onclick
+    
+    // Força a função de login a ficar disponível globalmente na janela (window)
+    window.executeGoogleLogin = async function() {
+        try {
+            console.log("Disparando pop-up do Firebase Auth...");
+            await signInWithPopup(auth, provider);
+        } catch (err) {
+            console.error("Erro interno no pop-up do Firebase:", err);
+            alert("Erro ao abrir o login: " + err.message);
+        }
+    };
+
+    // Injeta o clique de forma direta via atributo para o navegador não bloquear
     const loginBtn = document.getElementById("btn-google-login");
     if (loginBtn) {
-        loginBtn.onclick = loginWithGoogle;
+        loginBtn.setAttribute("onclick", "window.executeGoogleLogin()");
     } else {
         console.warn("Aviso: Botão 'btn-google-login' não foi encontrado no HTML ainda.");
     }
 
     const logoutBtn = document.getElementById("btn-logout");
     if (logoutBtn) {
-        logoutBtn.onclick = logoutSystem;
+        logoutBtn.onclick = async () => { await signOut(auth); };
     }
 
+    // Monitor do Estado de Login do Usuário
     onAuthStateChanged(auth, (user) => {
         if (user) {
+            console.log("Usuário autenticado com sucesso:", user.email);
             currentUser = user;
             isAdmin = (user.email === 'anna@agenciarei.com' || user.email === 'anna.agenciarei@gmail.com');
             
@@ -78,9 +89,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (document.getElementById("btn-export-sheets")) document.getElementById("btn-export-sheets").style.display = "none";
             }
 
+            // Inicializa a escuta do banco
             initRealTimeListener();
-            gisInit();
-            gapiLoad();
+            
+            // Carrega os scripts da agenda em segundo plano após o login para não travar
+            setTimeout(() => {
+                try {
+                    gisInit();
+                    gapiLoad();
+                } catch(e) { console.warn("Aguardando carregamento final dos scripts Google..."); }
+            }, 1500);
+
         } else {
             currentUser = null;
             isAdmin = false;
@@ -99,13 +118,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if(saveNotesBtn) saveNotesBtn.onclick = saveQuickNotes;
 });
 
-async function loginWithGoogle() {
-    try { await signInWithPopup(auth, provider); } 
-    catch (err) { console.error("Erro Login: ", err); alert("Erro ao autenticar com o Google."); }
-}
-
-async function logoutSystem() { await signOut(auth); }
-
 // ==========================================================================
 // FILTRAGEM E ESCUTA EM TEMPO REAL (FIREBASE)
 // ==========================================================================
@@ -121,7 +133,7 @@ function initRealTimeListener() {
         localLeadsCache = [];
         snapshot.forEach((doc) => {
             const data = doc.data();
-            // Regra de Isolamento: Closers normais só veem seus dados. Anna (Admin) pode alternar filtros.
+            // Regra de Isolamento: Anna vê tudo se selecionar "todos", Closers só veem o próprio e-mail
             if (isAdmin && selectedFilter === "todos") {
                 localLeadsCache.push({ id: doc.id, ...data });
             } else {
@@ -303,7 +315,7 @@ window.deleteLead = async function(id) {
     }
 };
 
-// MODAL DE NOTAS + INTELLIGENCE OBJECTION HELPER
+// MODAL DE NOTAS + PLAYBOOK DE OBJEÇÕES EM TEMPO REAL
 let currentActiveNotesLeadId = null;
 window.openNotesModal = function(id) {
     const lead = localLeadsCache.find(l => l.id === id);
