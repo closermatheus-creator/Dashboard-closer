@@ -68,48 +68,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Monitor do Estado de Login do Usuário
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            console.log("Usuário autenticado com sucesso:", user.email);
-            currentUser = user;
-            isAdmin = (user.email === 'anna@agenciarei.com' || user.email === 'anna.agenciarei@gmail.com');
+    // 2. BUSCA E INJETA A FOTO DO PERFIL DO GOOGLE (CORRIGIDO)
+            const photoDisplay = document.getElementById("user-display-photo");
+            const defaultAvatar = document.getElementById("user-default-avatar");
             
-            const nameDisplay = document.getElementById("user-display-name");
-            if (nameDisplay) nameDisplay.innerText = user.displayName || user.email;
-            
-            if (document.getElementById("login-screen")) document.getElementById("login-screen").style.display = "none";
-            if (document.getElementById("app-layout")) document.getElementById("app-layout").style.display = "block";
-
-            if (isAdmin) {
-                if (document.getElementById("admin-closer-filter-wrapper")) document.getElementById("admin-closer-filter-wrapper").style.display = "block";
-                if (document.getElementById("btn-export-sheets")) document.getElementById("btn-export-sheets").style.display = "inline-flex";
-                if (document.getElementById("insights-panel-title")) {
-                    document.getElementById("insights-panel-title").innerHTML = `<i class="fa-solid fa-crown" style="color:var(--warning-clean)"></i> Auditoria Estratégica da Anna`;
+            if (photoDisplay && user.photoURL) {
+                photoDisplay.src = user.photoURL;
+                photoDisplay.style.display = "block"; // Mostra a foto real
+                
+                if (defaultAvatar) {
+                    defaultAvatar.style.display = "none"; // Esconde o ícone de gravata cinza antigo
                 }
-            } else {
-                if (document.getElementById("admin-closer-filter-wrapper")) document.getElementById("admin-closer-filter-wrapper").style.display = "none";
-                if (document.getElementById("btn-export-sheets")) document.getElementById("btn-export-sheets").style.display = "none";
             }
-
-            // Inicializa a escuta do banco
-            initRealTimeListener();
-            
-            // Carrega os scripts da agenda em segundo plano
-            setTimeout(() => {
-                try {
-                    gisInit();
-                    gapiLoad();
-                } catch(e) { console.warn("Aguardando carregamento final dos scripts Google..."); }
-            }, 1500);
-
-        } else {
-            currentUser = null;
-            isAdmin = false;
-            if (firebaseUnsubscribe) firebaseUnsubscribe();
-            if (document.getElementById("app-layout")) document.getElementById("app-layout").style.display = "none";
-            if (document.getElementById("login-screen")) document.getElementById("login-screen").style.display = "flex";
-        }
-    });
 
     window.addEventListener('refresh-metrics', () => {
         window.populateSdrFilterOptions();
