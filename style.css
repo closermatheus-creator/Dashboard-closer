@@ -25,6 +25,7 @@ body {
 
 .tab-content { display: none !important; }
 .tab-content.active-content { display: block !important; }
+#overview-insights.active-content { display: flex !important; }
 
 /* ==========================================================================
    TELA DE AUTENTICAÇÃO (LOGIN)

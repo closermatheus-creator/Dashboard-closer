@@ -54,7 +54,6 @@
                 
                 <div class="user-profile-menu">
                     <div class="user-avatar-small">
-                        <img id="user-avatar-img" src="" alt="foto" style="display:none; width:26px; height:26px; border-radius:50%; object-fit:cover;">
                         <i class="fa-solid fa-user-tie"></i>
                     </div>
                     <span id="user-display-name" style="font-weight:600; font-size:11px; margin-left:4px;">...</span>
@@ -101,154 +100,96 @@
                 </div>
             </section>
 
-            <section id="overview-insights" class="tab-content">
-                <div class="filter-bar-insights parhub-card">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <i class="fa-solid fa-filter color-neon" style="font-size:14px;"></i>
-                        <div>
-                            <h4 style="margin:0; font-size:13px;" id="insights-panel-title">Inteligência Competitiva</h4>
-                        </div>
+            <section id="overview-insights" class="tab-content" style="height:calc(100vh - 50px); overflow:hidden; display:none; flex-direction:column; gap:6px; padding:8px 16px;">
+
+                <!-- BARRA DE FILTROS COMPACTA -->
+                <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:6px 12px;flex-shrink:0;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <i class="fa-solid fa-filter" style="color:var(--neon-accent);font-size:11px;"></i>
+                        <h4 style="margin:0;font-size:12px;font-weight:700;" id="insights-panel-title">Inteligência Competitiva</h4>
                     </div>
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <button id="btn-export-sheets" class="btn-secondary" style="display:none;" onclick="window.exportToSheetsCSV()">
-                            <i class="fa-solid fa-file-excel" style="color:#10B981;"></i> Exportar para Planilha
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <button id="btn-export-sheets" class="btn-secondary" style="display:none;padding:4px 8px;font-size:10px;" onclick="window.exportToSheetsCSV()">
+                            <i class="fa-solid fa-file-excel" style="color:#10B981;"></i> Exportar
                         </button>
-                        <!-- Botão de Metas — só aparece para Anna (controlado pelo JS) -->
-                        <button id="btn-definir-metas" class="btn-secondary" style="display:none;" onclick="window.openMetasModal()">
+                        <button id="btn-definir-metas" class="btn-secondary" style="display:none;padding:4px 8px;font-size:10px;" onclick="window.openMetasModal()">
                             <i class="fa-solid fa-bullseye" style="color:var(--neon-accent);"></i> Definir Metas
                         </button>
-                        <select id="filter-sdr-select" onchange="window.calculateAdvancedMetrics()" class="premium-select-filter">
+                        <select id="filter-sdr-select" onchange="window.calculateAdvancedMetrics()" class="premium-select-filter" style="padding:3px 8px;font-size:10px;">
                             <option value="todos">Todos os SDRs</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- ============================================================
-                     BLOCO 1: FATURAMENTO DO MÊS COM BARRA DE PROGRESSO
-                     (substitui os 3 cards semanal/quinzenal/mensal)
-                     ============================================================ -->
-                <div id="billing-month-block" style="margin-bottom:12px;">
-                    <!-- Preenchido dinamicamente pelo JS -->
+                <!-- LINHA 1: FATURAMENTO + CONVERSÃO + PITCH + DECISOR -->
+                <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:6px;flex-shrink:0;">
+                    <div id="billing-month-block"></div>
+                    <div class="parhub-card" style="padding:10px;">
+                        <div style="font-size:9px;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;"><i class="fa-solid fa-percent" style="color:var(--purple-accent);margin-right:3px;"></i>Conversão</div>
+                        <div id="conv-geral-numero" style="font-size:26px;font-weight:800;color:var(--neon-accent);line-height:1;">0%</div>
+                        <div id="conv-geral-detalhe" style="font-size:9px;color:var(--text-muted);margin-top:2px;">0 fechados / 0 reuniões</div>
+                        <div id="conv-por-closer-lista" style="display:flex;flex-direction:column;gap:3px;margin-top:6px;"></div>
+                    </div>
+                    <div class="parhub-card" style="padding:10px;">
+                        <div style="font-size:9px;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;"><i class="fa-solid fa-bullseye" style="color:var(--blue-accent);margin-right:3px;"></i>Taxa de Pitch</div>
+                        <div id="sdr-pitch-rate" style="font-size:26px;font-weight:800;color:var(--blue-accent);line-height:1;">0%</div>
+                        <div id="sdr-pitch-details" style="font-size:9px;color:var(--text-muted);margin-top:2px;">0 Fechados / 0 Pitches</div>
+                    </div>
+                    <div class="parhub-card" style="padding:10px;">
+                        <div style="font-size:9px;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;"><i class="fa-solid fa-user-check" style="color:var(--success-clean);margin-right:3px;"></i>Decisor</div>
+                        <div id="sdr-decisor-rate" style="font-size:26px;font-weight:800;color:var(--success-clean);line-height:1;">0%</div>
+                        <div id="sdr-decisor-details" style="font-size:9px;color:var(--text-muted);margin-top:2px;">0 Presentes / 0 Reuniões</div>
+                    </div>
                 </div>
 
-                <!-- ============================================================
-                     BLOCO 2: TAXA DE CONVERSÃO GERAL + POR CLOSER
-                     ============================================================ -->
-                <div style="display:grid; grid-template-columns: 1.6fr 1fr; gap:12px; margin-top:12px;">
-                    <div class="parhub-card" style="padding:14px;">
-                        <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:12px;">
-                            <i class="fa-solid fa-chart-line" style="color:var(--neon-accent);"></i>
-                            <h4 style="margin:0;font-size:11px;font-weight:700;">Faturamento ao Longo do Tempo</h4>
-                        </div>
-                        <div style="position:relative; height:180px;">
+                <!-- LINHA 2: GRÁFICO + FUNIL + ORIGEM + OBJEÇÕES -->
+                <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:6px;flex:1;min-height:0;">
+                    <div class="parhub-card" style="padding:10px;display:flex;flex-direction:column;">
+                        <div style="font-size:9px;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-bottom:6px;"><i class="fa-solid fa-chart-line" style="color:var(--neon-accent);margin-right:3px;"></i>Faturamento ao Longo do Tempo</div>
+                        <div style="position:relative;flex:1;min-height:0;">
                             <canvas id="chart-faturamento"></canvas>
                         </div>
                     </div>
-                    <!-- Taxa de conversão: número grande + por closer -->
-                    <div class="parhub-card" style="padding:14px;">
-                        <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:12px;">
-                            <i class="fa-solid fa-percent" style="color:var(--purple-accent);"></i>
-                            <h4 style="margin:0;font-size:11px;font-weight:700;">Taxa de Conversão do Mês</h4>
-                        </div>
-                        <div style="text-align:center; margin-bottom:12px;">
-                            <h1 id="conv-geral-numero" style="margin:0; font-size:38px; font-weight:800; color:var(--neon-accent);">0%</h1>
-                            <p style="margin:4px 0 0; font-size:10px; color:var(--text-muted);" id="conv-geral-detalhe">0 fechados / 0 reuniões</p>
-                        </div>
-                        <!-- Lista de conversão por closer — preenchida pelo JS -->
-                        <div id="conv-por-closer-lista" style="display:flex;flex-direction:column;gap:5px;"></div>
-                    </div>
-                </div>
-
-                <!-- ============================================================
-                     BLOCO 3: PERFORMANCE POR SDR (Ingrid e Bruno — cards)
-                     ============================================================ -->
-                <div style="margin-top:12px;">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;border-left:3px solid var(--warning-clean);padding-left:10px;">
-                        <i class="fa-solid fa-users" style="color:var(--warning-clean);"></i>
-                        <h4 style="margin:0;font-size:12px;font-weight:700;">Performance por SDR</h4>
-                    </div>
-                    <div id="sdr-cards-container" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                        <!-- Preenchido dinamicamente pelo JS -->
-                    </div>
-                </div>
-
-                <!-- ============================================================
-                     BLOCO 4: PERFORMANCE POR CLOSER (cards individuais)
-                     ============================================================ -->
-                <div style="margin-top:12px;">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;border-left:3px solid var(--purple-accent);padding-left:10px;">
-                        <i class="fa-solid fa-user-tie" style="color:var(--purple-accent);"></i>
-                        <h4 style="margin:0;font-size:12px;font-weight:700;">Performance por Closer</h4>
-                    </div>
-                    <div id="closer-cards-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:12px;">
-                        <!-- Preenchido dinamicamente pelo JS -->
-                    </div>
-                </div>
-
-                <!-- LINHA 2: Funil (rosca) + Origem (rosca) -->
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
-                    <div class="parhub-card" style="padding:14px;">
-                        <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:12px;">
-                            <i class="fa-solid fa-filter" style="color:var(--blue-accent);"></i>
-                            <h4 style="margin:0;font-size:11px;font-weight:700;">Funil de Vendas</h4>
-                        </div>
-                        <div style="position:relative; height:160px;">
+                    <div class="parhub-card" style="padding:10px;display:flex;flex-direction:column;">
+                        <div style="font-size:9px;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;"><i class="fa-solid fa-filter" style="color:var(--blue-accent);margin-right:3px;"></i>Funil de Vendas</div>
+                        <div style="position:relative;height:90px;flex-shrink:0;">
                             <canvas id="chart-funil"></canvas>
                         </div>
-                        <div style="display:flex;flex-direction:column;gap:3px;margin-top:10px;">
-                            <div class="channel-item"><span>Total Agendadas:</span><strong id="funnel-total">0</strong></div>
-                            <div class="channel-item"><span>No-Shows:</span><strong style="color:var(--danger-clean);" id="funnel-noshow">0</strong></div>
-                            <div class="channel-item"><span>Aprovados Pitch:</span><strong style="color:var(--success-clean);" id="funnel-qualificados">0</strong></div>
-                            <div class="channel-item"><span>Reprovados:</span><strong style="color:var(--warning-clean);" id="funnel-reprovados">0</strong></div>
+                        <div style="display:flex;flex-direction:column;gap:2px;margin-top:6px;">
+                            <div class="channel-item" style="padding:3px 6px;font-size:9px;"><span>Agendadas</span><strong id="funnel-total">0</strong></div>
+                            <div class="channel-item" style="padding:3px 6px;font-size:9px;"><span>No-Show</span><strong style="color:var(--danger-clean);" id="funnel-noshow">0</strong></div>
+                            <div class="channel-item" style="padding:3px 6px;font-size:9px;"><span>Pitch</span><strong style="color:var(--success-clean);" id="funnel-qualificados">0</strong></div>
+                            <div class="channel-item" style="padding:3px 6px;font-size:9px;"><span>Reprovados</span><strong style="color:var(--warning-clean);" id="funnel-reprovados">0</strong></div>
                         </div>
                     </div>
-                    <div class="parhub-card" style="padding:14px;">
-                        <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:12px;">
-                            <i class="fa-solid fa-chart-pie" style="color:var(--neon-accent);"></i>
-                            <h4 style="margin:0;font-size:11px;font-weight:700;">Leads por Origem</h4>
-                        </div>
-                        <div style="position:relative; height:160px;">
+                    <div class="parhub-card" style="padding:10px;display:flex;flex-direction:column;">
+                        <div style="font-size:9px;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;"><i class="fa-solid fa-chart-pie" style="color:var(--neon-accent);margin-right:3px;"></i>Origem</div>
+                        <div style="position:relative;height:90px;flex-shrink:0;">
                             <canvas id="chart-origem"></canvas>
                         </div>
-                        <div style="display:flex;flex-direction:column;gap:3px;margin-top:10px;">
-                            <div class="channel-item">
-                                <div style="display:flex;align-items:center;gap:6px;"><span class="dot-indicator bg-blue"></span><span>I.A Yara</span></div>
+                        <div style="display:flex;flex-direction:column;gap:2px;margin-top:6px;">
+                            <div class="channel-item" style="padding:3px 6px;font-size:9px;">
+                                <div style="display:flex;align-items:center;gap:4px;"><span class="dot-indicator bg-blue"></span><span>I.A Yara</span></div>
                                 <strong id="channel-yara-rate">0%</strong>
                             </div>
-                            <div class="channel-item">
-                                <div style="display:flex;align-items:center;gap:6px;"><span class="dot-indicator bg-purple"></span><span>CRM</span></div>
+                            <div class="channel-item" style="padding:3px 6px;font-size:9px;">
+                                <div style="display:flex;align-items:center;gap:4px;"><span class="dot-indicator bg-purple"></span><span>CRM</span></div>
                                 <strong id="channel-crm-rate">0%</strong>
                             </div>
                         </div>
                     </div>
+                    <div class="parhub-card" style="padding:10px;display:flex;flex-direction:column;">
+                        <div style="font-size:9px;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-bottom:6px;"><i class="fa-solid fa-chart-bar" style="color:var(--danger-clean);margin-right:3px;"></i>Objeções & Perdas</div>
+                        <div class="rk-histogram-container" id="loss-reasons-container" style="flex:1;"></div>
+                    </div>
                 </div>
 
-                <!-- LINHA 3: Efetividade + Objeções -->
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
-                    <div class="parhub-card" style="padding:14px;">
-                        <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:8px;">
-                            <i class="fa-solid fa-bullseye"></i><h4 style="margin:0;font-size:11px;font-weight:700;">Efetividade de Pitch & Decisores</h4>
-                        </div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
-                            <div style="text-align:center;">
-                                <div style="font-size:9px;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Taxa de Pitch</div>
-                                <h1 id="sdr-pitch-rate" style="margin:4px 0 1px;font-size:22px;font-weight:800;">0%</h1>
-                                <p id="sdr-pitch-details" style="margin:0;font-size:9px;color:var(--text-muted);">0 Fechados / 0 Pitches</p>
-                            </div>
-                            <div style="text-align:center;">
-                                <div style="font-size:9px;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Presença Decisor</div>
-                                <h1 id="sdr-decisor-rate" style="margin:4px 0 1px;font-size:22px;font-weight:800;">0%</h1>
-                                <p id="sdr-decisor-details" style="margin:0;font-size:9px;color:var(--text-muted);">0 Presentes / 0 Reuniões</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="parhub-card" style="padding:14px;">
-                        <div class="intel-header" style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:8px;">
-                            <i class="fa-solid fa-chart-bar"></i><h4 style="margin:0;font-size:11px;font-weight:700;">Mapa de Objeções & Perdas</h4>
-                        </div>
-                        <div class="rk-histogram-container" id="loss-reasons-container" style="margin-top:8px;"></div>
-                    </div>
+                <!-- LINHA 3: SDR + CLOSER -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex-shrink:0;">
+                    <div id="sdr-cards-container" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"></div>
+                    <div id="closer-cards-container" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;"></div>
                 </div>
+
             </section>
         </main>
     </div>
