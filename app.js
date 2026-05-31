@@ -39,25 +39,27 @@ let tokenClient;
 // ==========================================================================
 // CENTRAL DE AUTENTICAÇÃO E CONTROLE DE TRAVA DE SESSÃO
 // ==========================================================================
+// ==========================================================================
+// CENTRAL DE AUTENTICAÇÃO E CONTROLE DE TRAVA DE SESSÃO (CORRIGIDO)
+// ==========================================================================
 document.addEventListener("DOMContentLoaded", () => {
     
-    // Força a função de login a ficar disponível globalmente na janela (window)
-    window.executeGoogleLogin = async function() {
-        try {
-            console.log("Disparando pop-up do Firebase Auth...");
-            await signInWithPopup(auth, provider);
-        } catch (err) {
-            console.error("Erro interno no pop-up do Firebase:", err);
-            alert("Erro ao abrir o login: " + err.message);
-        }
-    };
-
-    // Injeta o clique de forma direta via atributo para o navegador não bloquear
+    // Injeta a função de login direto no escopo do botão, sem depender de window externo
     const loginBtn = document.getElementById("btn-google-login");
     if (loginBtn) {
-        loginBtn.setAttribute("onclick", "window.executeGoogleLogin()");
+        loginBtn.onclick = async () => {
+            try {
+                console.log("Disparando pop-up do Firebase Auth via clique direto...");
+                await signInWithPopup(auth, provider);
+            } catch (err) {
+                console.error("Erro interno no pop-up do Firebase:", err);
+                alert("Erro ao abrir o login: " + err.message);
+            }
+        };
+        // Remove qualquer atributo antigo do HTML para não dar conflito
+        loginBtn.removeAttribute("onclick");
     } else {
-        console.warn("Aviso: Botão 'btn-google-login' não foi encontrado no HTML ainda.");
+        console.warn("Aviso: Botão 'btn-google-login' não foi encontrado no HTML.");
     }
 
     const logoutBtn = document.getElementById("btn-logout");
@@ -92,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Inicializa a escuta do banco
             initRealTimeListener();
             
-            // Carrega os scripts da agenda em segundo plano após o login para não travar
+            // Carrega os scripts da agenda em segundo plano
             setTimeout(() => {
                 try {
                     gisInit();
