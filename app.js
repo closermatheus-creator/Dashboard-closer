@@ -39,9 +39,6 @@ let tokenClient;
 // ==========================================================================
 // CENTRAL DE AUTENTICAÇÃO E CONTROLE DE TRAVA DE SESSÃO
 // ==========================================================================
-// ==========================================================================
-// CENTRAL DE AUTENTICAÇÃO E CONTROLE DE TRAVA DE SESSÃO (CORRIGIDO)
-// ==========================================================================
 document.addEventListener("DOMContentLoaded", () => {
     
     // Injeta a função de login direto no escopo do botão, sem depender de window externo
@@ -56,7 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert("Erro ao abrir o login: " + err.message);
             }
         };
-        // Remove qualquer atributo antigo do HTML para não dar conflito
         loginBtn.removeAttribute("onclick");
     } else {
         console.warn("Aviso: Botão 'btn-google-login' não foi encontrado no HTML.");
@@ -67,19 +63,70 @@ document.addEventListener("DOMContentLoaded", () => {
         logoutBtn.onclick = async () => { await signOut(auth); };
     }
 
-    // Monitor do Estado de Login do Usuário
-    // 2. BUSCA E INJETA A FOTO DO PERFIL DO GOOGLE (CORRIGIDO)
+    // Monitor do Estado de Login do Usuário (RESTAURADO E CONFIGURADO)
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log("Usuário autenticado com sucesso:", user.email);
+            currentUser = user;
+            
+            // Define quem é administrador (Anna)
+            isAdmin = (user.email === 'anna@agenciarei.com' || user.email === 'anna.agenciarei@gmail.com');
+            
+            // 1. Atualiza o Nome do Usuário
+            const nameDisplay = document.getElementById("user-display-name");
+            if (nameDisplay) nameDisplay.innerText = user.displayName || user.email;
+            
+            // 2. Busca e injeta a foto do perfil do Google sem quebrar o CSS
             const photoDisplay = document.getElementById("user-display-photo");
             const defaultAvatar = document.getElementById("user-default-avatar");
             
             if (photoDisplay && user.photoURL) {
                 photoDisplay.src = user.photoURL;
-                photoDisplay.style.display = "block"; // Mostra a foto real
-                
-                if (defaultAvatar) {
-                    defaultAvatar.style.display = "none"; // Esconde o ícone de gravata cinza antigo
-                }
+                photoDisplay.style.display = "block";
+                if (defaultAvatar) defaultAvatar.style.display = "none";
             }
+            
+            // Libera a tela para o usuário logado
+            if (document.getElementById("login-screen")) document.getElementById("login-screen").style.display = "none";
+            if (document.getElementById("app-layout")) document.getElementById("app-layout").style.display = "block";
+
+            // Aplica permissões visuais de Admin ou Closer comum
+            if (isAdmin) {
+                if (document.getElementById("admin-closer-filter-wrapper")) document.getElementById("admin-closer-filter-wrapper").style.display = "block";
+                if (document.getElementById("btn-export-sheets")) document.getElementById("btn-export-sheets").style.display = "inline-flex";
+                if (document.getElementById("insights-panel-title")) {
+                    document.getElementById("insights-panel-title").innerHTML = `<i class="fa-solid fa-crown" style="color:var(--warning-clean)"></i> Auditoria Estratégica da Anna`;
+                }
+            } else {
+                if (document.getElementById("admin-closer-filter-wrapper")) document.getElementById("admin-closer-filter-wrapper").style.display = "none";
+                if (document.getElementById("btn-export-sheets")) document.getElementById("btn-export-sheets").style.display = "none";
+            }
+
+            // Inicializa a escuta em tempo real do banco de dados
+            initRealTimeListener();
+            
+            // Força o cálculo inicial dos Insights
+            setTimeout(() => {
+                if (typeof window.populateSdrFilterOptions === "function") window.populateSdrFilterOptions();
+                if (typeof window.calculateAdvancedMetrics === "function") window.calculateAdvancedMetrics();
+            }, 800);
+            
+            // Carrega os scripts da agenda em segundo plano
+            setTimeout(() => {
+                try {
+                    gisInit();
+                    gapiLoad();
+                } catch(e) { console.warn("Aguardando carregamento final dos scripts Google..."); }
+            }, 1500);
+
+        } else {
+            currentUser = null;
+            isAdmin = false;
+            if (firebaseUnsubscribe) firebaseUnsubscribe();
+            if (document.getElementById("app-layout")) document.getElementById("app-layout").style.display = "none";
+            if (document.getElementById("login-screen")) document.getElementById("login-screen").style.display = "flex";
+        }
+    });
 
     window.addEventListener('refresh-metrics', () => {
         window.populateSdrFilterOptions();
@@ -105,7 +152,6 @@ function initRealTimeListener() {
         localLeadsCache = [];
         snapshot.forEach((doc) => {
             const data = doc.data();
-            // Regra de Isolamento: Anna vê tudo se selecionar "todos", Closers só veem o próprio e-mail
             if (isAdmin && selectedFilter === "todos") {
                 localLeadsCache.push({ id: doc.id, ...data });
             } else {
@@ -131,7 +177,7 @@ function renderLeadsTable() {
     if (totalCounter) totalCounter.innerText = `${localLeadsCache.length} Lead${localLeadsCache.length !== 1 ? 's' : ''}`;
 
     if (localLeadsCache.length === 0) {
-        container.innerHTML = `<tr><td colspan="9" class="text-muted" style="text-align: center; padding: 20px;">Nenhum lead sob sua gestão ativa no momento.</td></tr>`;
+        container.innerHTML = `<tr><td colspan="9" class="text-muted" style="text-align: center; padding: 20px;">Nenhum lead sob sua gestão activa no momento.</td></tr>`;
         return;
     }
 
@@ -411,7 +457,7 @@ function renderLossHistogram(objetoPerdas) {
     if (valores.reduce((a, b) => a + b, 0) === 0) { container.innerHTML = `<p class="text-muted" style="padding:5px 0;">Nenhum lead perdido registrado.</p>`; return; }
     
     container.innerHTML = "";
-    const nomesAmigaveis = { "Sem Caixa": "Sem Caixa / Preço", "Sem Decisor": "Sem Decisor na Call", "Não tem o Perfil": "Sem Perfil", "Pensar / Sumiu": "Sumiu", "Outro": "Outros" };
+    const nomes Amigaveis = { "Sem Caixa": "Sem Caixa / Preço", "Sem Decisor": "Sem Decisor na Call", "Não tem o Perfil": "Sem Perfil", "Pensar / Sumiu": "Sumiu", "Outro": "Outros" };
 
     Object.keys(objetoPerdas).forEach(chave => {
         const row = document.createElement("div"); row.className = "rk-row";
