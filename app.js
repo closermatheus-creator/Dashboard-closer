@@ -7,7 +7,7 @@ import {
     onSnapshot, query, orderBy, setDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { 
-    getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut 
+    getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signOut 
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
 // CONFIGURAÇÃO DO FIREBASE (IMUTÁVEL)
@@ -42,7 +42,8 @@ let metasConfig = { metaGeral: 0, supermetaGeral: 0, metas: {} };
 const CLOSERS_CONHECIDOS = [
     { email: "anna@agenciarei.com",       nome: "Anna" },
     { email: "anna.agenciarei@gmail.com", nome: "Anna" },
-    // Adicione os outros closers aqui — basta copiar a linha e trocar email/nome
+    { email: "annatoledo.agenciarei@gmail.com", nome: "Anna Toledo" },
+    { email: "matheusmitt10@gmail.com",   nome: "Matheus Santos (Admin Teste)" }
 ];
 
 // CREDENCIAIS DA API GOOGLE CALENDAR
@@ -59,10 +60,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (loginBtn) {
         loginBtn.onclick = async () => {
             try {
-                await signInWithPopup(auth, provider);
+                await signInWithRedirect(auth, provider);
             } catch (err) {
-                console.error("Erro no pop-up do Firebase:", err);
-                alert("Erro ao abrir o login: " + err.message);
+                console.error("Erro no login do Firebase:", err);
+                alert("Erro ao fazer login: " + err.message);
             }
         };
         loginBtn.removeAttribute("onclick");
@@ -73,31 +74,10 @@ document.addEventListener("DOMContentLoaded", () => {
         logoutBtn.onclick = async () => { await signOut(auth); };
     }
 
-    // ==========================================================================
-// VARIÁVEIS DE SESSÃO GLOBAL & CLOSERS CONHECIDOS
-// ==========================================================================
-let currentUser = null;
-let isAdmin = false;
-let localLeadsCache = [];
-let firebaseUnsubscribe = null;
-let metasUnsubscribe = null;
-
-let metasConfig = { metaGeral: 0, supermetaGeral: 0, metas: {} };
-
-// Lista de closers conhecidos (Atualizado com o seu e-mail de teste)
-const CLOSERS_CONHECIDOS = [
-    { email: "anna@agenciarei.com",       nome: "Anna" },
-    { email: "anna.agenciarei@gmail.com", nome: "Anna" },
-    { email: "annatoledo.agenciarei@gmail.com", nome: "Anna Toledo" },
-    { email: "matheusmitt10@gmail.com",   nome: "Matheus Santos (Admin Teste)" }
-];
-
-// ... (mantenha as credenciais do Google Calendar que vêm logo abaixo aqui) ...
-
-// ==========================================================================
-// CENTRAL DE AUTENTICAÇÃO (onAuthStateChanged ATUALIZADO)
-// ==========================================================================
-// ... (dentro do seu DOMContentLoaded, procure o onAuthStateChanged e substitua por este):
+    // Trata o retorno do redirect de login
+    getRedirectResult(auth).catch((err) => {
+        console.error("Erro no redirect do Firebase:", err);
+    });
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
@@ -113,6 +93,15 @@ const CLOSERS_CONHECIDOS = [
             
             const nameDisplay = document.getElementById("user-display-name");
             if (nameDisplay) nameDisplay.innerText = user.displayName || user.email;
+
+            // Atualiza foto do Google no avatar
+            const avatarEl = document.getElementById("user-avatar-img");
+            if (avatarEl && user.photoURL) {
+                avatarEl.src = user.photoURL;
+                avatarEl.style.display = "block";
+                const iconEl = avatarEl.parentElement?.querySelector("i");
+                if (iconEl) iconEl.style.display = "none";
+            }
 
             if (document.getElementById("login-screen")) document.getElementById("login-screen").style.display = "none";
             if (document.getElementById("app-layout")) document.getElementById("app-layout").style.display = "block";
