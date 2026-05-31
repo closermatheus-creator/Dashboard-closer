@@ -19,7 +19,12 @@
             <h2>Mesa de Operações</h2>
             <p class="text-muted" style="margin-bottom: 15px;">Faça login com sua conta da agência para acessar seus leads.</p>
             
-            <!-- BOTÃO COM ID E CLASSE INTEGRADOS AO SEU CSS PRESET -->
+ <div id="login-screen" class="auth-overlay">
+        <div class="auth-box">
+            <img src="logo.png" alt="Agência Rei" class="auth-logo">
+            <h2>Mesa de Operações</h2>
+            <p class="text-muted" style="margin-bottom: 15px;">Faça login com sua conta da agência para acessar seus leads.</p>
+            
             <button id="btn-google-login" class="btn-primary" style="width:100%; justify-content:center;">
                 <i class="fa-brands fa-google"></i> Entrar com o Google
             </button>
@@ -58,12 +63,19 @@
                     <i class="fa-solid fa-plus"></i> Inserir Lead
                 </button>
                 
-                <div class="user-profile-menu">
-                    <div class="user-avatar-small">
-                        <i class="fa-solid fa-user-tie"></i>
+                <div class="user-profile-menu" style="display: flex; align-items: center; gap: 6px;">
+                    <div class="user-avatar-wrapper" style="position: relative; display: flex; align-items: center;">
+                        <div id="user-default-avatar" class="user-avatar-small">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </div>
+                        <img id="user-display-photo" src="" alt="Perfil" style="width: 26px; height: 26px; border-radius: 50%; display: none; object-fit: cover; border: 1px solid var(--neon-accent);">
                     </div>
+                    
                     <span id="user-display-name" style="font-weight:600; font-size:11px; margin-left:4px;">...</span>
-                    <button id="btn-logout" title="Sair do Sistema" style="background:none; border:none; color:var(--danger-clean); cursor:pointer; font-size:12px; margin-left:6px;"><i class="fa-solid fa-right-from-bracket"></i></button>
+                    
+                    <button id="btn-logout" title="Sair do Sistema" style="background:none; border:none; color:var(--danger-clean); cursor:pointer; font-size:12px; margin-left:6px;">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
                 </div>
             </div>
         </header>
@@ -280,5 +292,38 @@
     <script async defer src="https://apis.google.com/js/api.js"></script>
     <script async defer src="https://accounts.google.com/gsi/client"></script>
     <script type="module" src="app.js"></script>
+    <script>
+        function switchTab(event, tabId) {
+            // Evita que a página recarregue ou role para o topo ao clicar
+            event.preventDefault();
+            
+            // 1. Remove a classe 'active' de todos os botões do menu superior
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            
+            // 2. Adiciona a classe 'active' apenas no botão que foi clicado
+            event.currentTarget.classList.add('active');
+            
+            // 3. Esconde todos os blocos de conteúdo de telas (.tab-content)
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-content'));
+            
+            // 4. Mostra o bloco de conteúdo correspondente à aba clicada (Mesa ou Insights)
+            const targetContent = document.getElementById(tabId);
+            if (targetContent) {
+                targetContent.classList.add('active-content');
+            }
+
+            // 5. Atualiza o título dinâmico na barra superior e dispara as métricas
+            const titleContext = document.getElementById("page-title-context");
+            if (tabId === 'overview-insights') {
+                if (titleContext) titleContext.innerText = "Overview & Insights";
+                
+                // Esse é o gatilho mágico que avisa o app.js para calcular o faturamento e atualizar os cards
+                console.log("Disparando atualização de métricas...");
+                window.dispatchEvent(new CustomEvent('refresh-metrics'));
+            } else {
+                if (titleContext) titleContext.innerText = "Mesa de Operações";
+            }
+        }
+    </script>
 </body>
 </html>
