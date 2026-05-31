@@ -73,10 +73,43 @@ document.addEventListener("DOMContentLoaded", () => {
         logoutBtn.onclick = async () => { await signOut(auth); };
     }
 
+    // ==========================================================================
+// VARIÁVEIS DE SESSÃO GLOBAL & CLOSERS CONHECIDOS
+// ==========================================================================
+let currentUser = null;
+let isAdmin = false;
+let localLeadsCache = [];
+let firebaseUnsubscribe = null;
+let metasUnsubscribe = null;
+
+let metasConfig = { metaGeral: 0, supermetaGeral: 0, metas: {} };
+
+// Lista de closers conhecidos (Atualizado com o seu e-mail de teste)
+const CLOSERS_CONHECIDOS = [
+    { email: "anna@agenciarei.com",       nome: "Anna" },
+    { email: "anna.agenciarei@gmail.com", nome: "Anna" },
+    { email: "annatoledo.agenciarei@gmail.com", nome: "Anna Toledo" },
+    { email: "matheusmitt10@gmail.com",   nome: "Matheus Santos (Admin Teste)" }
+];
+
+// ... (mantenha as credenciais do Google Calendar que vêm logo abaixo aqui) ...
+
+// ==========================================================================
+// CENTRAL DE AUTENTICAÇÃO (onAuthStateChanged ATUALIZADO)
+// ==========================================================================
+// ... (dentro do seu DOMContentLoaded, procure o onAuthStateChanged e substitua por este):
+
     onAuthStateChanged(auth, (user) => {
         if (user) {
             currentUser = user;
-            isAdmin = (user.email === 'anna@agenciarei.com' || user.email === 'anna.agenciarei@gmail.com');
+            
+            // LIBERAÇÃO DE ADMIN: Agora aceita o seu e-mail de teste também!
+            isAdmin = (
+                user.email === 'anna@agenciarei.com' || 
+                user.email === 'anna.agenciarei@gmail.com' || 
+                user.email === 'annatoledo.agenciarei@gmail.com' || 
+                user.email === 'matheusmitt10@gmail.com'
+            );
             
             const nameDisplay = document.getElementById("user-display-name");
             if (nameDisplay) nameDisplay.innerText = user.displayName || user.email;
@@ -115,11 +148,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (document.getElementById("app-layout")) document.getElementById("app-layout").style.display = "none";
             if (document.getElementById("login-screen")) document.getElementById("login-screen").style.display = "flex";
         }
-    });
-
-    window.addEventListener('refresh-metrics', () => {
-        window.populateSdrFilterOptions();
-        window.calculateAdvancedMetrics();
     });
     
     const saveNotesBtn = document.getElementById("save-notes-btn");
