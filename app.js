@@ -72,7 +72,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (user) {
             console.log("Usuário autenticado com sucesso:", user.email);
             currentUser = user;
-            isAdmin = (user.email === 'anna@agenciarei.com' || user.email === 'anna.agenciarei@gmail.com');
+            // Define quem é administrador (Adicionei o e-mail oficial da Anna e o seu para teste)
+            isAdmin = (user.email === 'anna@agenciarei.com' || user.email === 'annatoledo.agenciarei@gmail.com' || user.email === 'SEU_EMAIL_AQUI@gmail.com');
             
             const nameDisplay = document.getElementById("user-display-name");
             if (nameDisplay) nameDisplay.innerText = user.displayName || user.email;
