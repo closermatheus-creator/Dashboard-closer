@@ -11,10 +11,10 @@ import {
 
 // CONFIGURAÇÃO DO FIREBASE (IMUTÁVEL)
 const firebaseConfig = {
-    apiKey: "AIzaSyAUla_3nMh_eMlELHUsmyXWYaHayWAAEJE",
+    apiKey: "AIzaSyAUla_3nMh_eMlELHUsmYxWYaHaYwaaejE",
     authDomain: "dashboard-closer-3f088.firebaseapp.com",
     projectId: "dashboard-closer-3f088",
-    storageBucket: "dashboard-closer-3f088.appspot.com",
+    storageBucket: "dashboard-closer-3f088.firebasestorage.app",
     messagingSenderId: "366563664458",
     appId: "1:366563664458:web:6e36507e266a720dd1bcb3"
 };
