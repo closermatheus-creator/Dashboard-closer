@@ -7,7 +7,7 @@ import {
     onSnapshot, query, orderBy, setDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { 
-    getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signOut 
+    getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut 
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
 // CONFIGURAÇÃO DO FIREBASE (IMUTÁVEL)
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (loginBtn) {
         loginBtn.onclick = async () => {
             try {
-                await signInWithRedirect(auth, provider);
+                aawait signInWithPopup(auth, provider);
             } catch (err) {
                 console.error("Erro no login do Firebase:", err);
                 alert("Erro ao fazer login: " + err.message);
@@ -75,14 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Trata o retorno do redirect de login
-    getRedirectResult(auth).then((result) => {
-    if (result?.user) {
-        console.log("Login via redirect OK:", result.user.email);
-    }
-    }).catch((err) => {
-        console.error("Erro no redirect:", err);
-    });
-
+    
     onAuthStateChanged(auth, (user) => {
         if (user) {
             currentUser = user;
