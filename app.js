@@ -76,6 +76,15 @@ document.addEventListener("DOMContentLoaded", () => {
             
             const nameDisplay = document.getElementById("user-display-name");
             if (nameDisplay) nameDisplay.innerText = user.displayName || user.email;
+
+            // Foto do perfil do Google
+            const photoImg = document.getElementById("user-display-photo");
+            const defaultIcon = document.getElementById("user-default-avatar");
+            if (photoImg && user.photoURL) {
+                photoImg.src = user.photoURL;
+                photoImg.style.display = "block";
+                if (defaultIcon) defaultIcon.style.display = "none";
+            }
             
             if (document.getElementById("login-screen")) document.getElementById("login-screen").style.display = "none";
             if (document.getElementById("app-layout")) document.getElementById("app-layout").style.display = "block";
