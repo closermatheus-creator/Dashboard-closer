@@ -96,16 +96,17 @@ document.addEventListener("DOMContentLoaded", () => {
             if (nameDisplay) nameDisplay.innerText = user.displayName || user.email;
 
             // Atualiza foto do Google no avatar
-            const avatarWrapper = document.querySelector(".user-avatar-small");
-            const avatarEl = document.getElementById("user-avatar-img");
-            if (avatarEl && avatarWrapper) {
+            
+            const avatarEl = document.getElementById("user-display-photo");
+            const avatarIcon = document.getElementById("user-default-avatar");
+            if (avatarEl) {
                 if (user.photoURL) {
-                    // Força reload da foto adicionando timestamp para evitar cache
-                    avatarEl.src = user.photoURL + (user.photoURL.includes('?') ? '&' : '?') + 't=' + Date.now();
-                    avatarEl.onload = () => avatarWrapper.classList.add("has-photo");
-                    avatarEl.onerror = () => avatarWrapper.classList.remove("has-photo");
+                    avatarEl.src = user.photoURL;
+                    avatarEl.style.display = 'block';
+                    if (avatarIcon) avatarIcon.style.display = 'none';
                 } else {
-                    avatarWrapper.classList.remove("has-photo");
+                    avatarEl.style.display = "none";
+                    if (avatarIcon) avatarIcon.style.display = "block";
                 }
             }
 
