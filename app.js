@@ -352,19 +352,19 @@ function renderLeadsTable() {
 
         tr.innerHTML = `
             <td onclick="window.editLead('${lead.id}')" style="cursor: pointer;" title="Clique para abrir edição">
-                <span class="lead-main-name" style="text-decoration: underline; text-decoration-color: transparent; transition: text-decoration-color 0.2s;">${lead.nome}</span>
+                <span class="lead-main-name">${lead.nome}</span>
                 <span class="lead-co-name">${lead.empresa || 'Sem Empresa'}</span>
             </td>
-            <td style="font-weight: 600;">${lead.faturamento || '—'}</td>
-            <td><span style="font-weight: 600;">${lead.sdr || 'Direto'}</span><span class="lead-co-name"><span class="p-badge ${badgeOrigem}">${lead.origem}</span></span></td>
-            <td>${dataFormatada}</td>
-            <td><span class="p-badge ${badgeDecisor}">Decisor: ${lead.decisor || 'Não'}</span></td>
-            <td><span class="p-badge ${badgeDiag}">${lead.statusDiag || 'Aprovado'}</span></td>
-            <td><span class="p-badge ${badgeDesfecho}">${lead.desfecho}</span><span class="lead-co-name color-neon" style="font-weight: 600;">${valorContrato}</span></td>
-            <td style="font-weight: 500; color:var(--text-muted);">${lead.closerName ? lead.closerName.split(' ')[0] : '—'}</td>
-            <td>
+            <td data-label="Faturamento" style="font-weight: 600;">${lead.faturamento || '—'}</td>
+            <td data-label="SDR / Origem"><span style="font-weight: 600;">${lead.sdr || 'Direto'}</span> <span class="p-badge ${badgeOrigem}">${lead.origem}</span></td>
+            <td data-label="Data Reunião">${dataFormatada}</td>
+            <td data-label="Qualificação"><span class="p-badge ${badgeDecisor}">Decisor: ${lead.decisor || 'Não'}</span></td>
+            <td data-label="Diagnóstico"><span class="p-badge ${badgeDiag}">${lead.statusDiag || 'Aprovado'}</span></td>
+            <td data-label="Desfecho"><span class="p-badge ${badgeDesfecho}">${lead.desfecho}</span> <span style="font-weight:600;color:var(--neon-accent);">${valorContrato}</span></td>
+            <td data-label="Closer" style="font-weight: 500; color:var(--text-muted);">${lead.closerName ? lead.closerName.split(' ')[0] : '—'}</td>
+            <td data-label="Ações">
                 <div class="btn-action-row">
-                    <button class="btn-sm-note" onclick="event.stopPropagation(); window.openNotesModal('${lead.id}')" title="Notas / Scripts"><i class="fa-solid fa-comment-dots"></i> Notas</button>
+                    <button class="btn-sm-note" onclick="event.stopPropagation(); window.openNotesModal('${lead.id}')"><i class="fa-solid fa-comment-dots"></i> Notas</button>
                     <button class="btn-action edit" onclick="event.stopPropagation(); window.editLead('${lead.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
                     <button class="btn-action delete" onclick="event.stopPropagation(); window.deleteLead('${lead.id}')"><i class="fa-solid fa-trash-can"></i></button>
                 </div>

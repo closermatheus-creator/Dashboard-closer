@@ -169,3 +169,209 @@ body {
     height: auto !important;
     min-height: 0 !important;
 }
+/* ==========================================================================
+   RESPONSIVIDADE MOBILE — BREAKPOINT 768px
+   ========================================================================== */
+
+/* BOTÃO HAMBURGUER */
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* FAB INSERIR LEAD MOBILE */
+.fab-insert-lead {
+    display: none;
+    position: fixed;
+    bottom: 20px; right: 20px;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--neon-accent), var(--purple-accent));
+    color: #000;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 200;
+    box-shadow: 0 4px 20px rgba(0,242,254,0.4);
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+
+    /* NAVBAR MOBILE */
+    .main-top-navbar {
+        padding: 8px 12px;
+        flex-wrap: nowrap;
+        gap: 8px;
+    }
+    .navbar-left h1 { display: none; }
+    .title-separator { display: none; }
+
+    .navbar-right {
+        gap: 6px;
+    }
+
+    /* Esconde itens no mobile */
+    .top-menu,
+    .action-separator,
+    .btn-sync-calendar,
+    .navbar-right > .btn-primary {
+        display: none !important;
+    }
+
+    /* Mostra hamburguer */
+    .mobile-menu-toggle { display: flex; }
+
+    /* FAB aparece no mobile */
+    .fab-insert-lead { display: flex; }
+
+    /* MENU MOBILE DROPDOWN */
+    .mobile-nav-drawer {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(5,7,12,0.9);
+        z-index: 500;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+    }
+    .mobile-nav-drawer.open { display: flex; }
+    .mobile-nav-drawer a {
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 20px;
+        font-weight: 700;
+        padding: 12px 32px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        width: 200px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    .mobile-nav-drawer a.active { color: var(--neon-accent); border-color: var(--neon-accent); }
+    .mobile-nav-close {
+        position: absolute;
+        top: 16px; right: 16px;
+        background: none; border: none;
+        color: var(--text-muted);
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    /* CONTEÚDO PRINCIPAL */
+    .parhub-main-content { padding: 10px; }
+
+    /* TABELA → CARDS NO MOBILE */
+    .parhub-premium-table thead { display: none; }
+    .parhub-premium-table tbody tr {
+        display: block;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        margin-bottom: 10px;
+        padding: 12px;
+    }
+    .parhub-premium-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        font-size: 11px;
+    }
+    .parhub-premium-table td:last-child { border-bottom: none; }
+    .parhub-premium-table td::before {
+        content: attr(data-label);
+        font-size: 9px;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        flex-shrink: 0;
+        margin-right: 8px;
+    }
+    .parhub-premium-table td:first-child {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-bottom: 8px;
+    }
+    .parhub-premium-table td:first-child::before { display: none; }
+    .lead-main-name { font-size: 13px; }
+    .btn-action-row { justify-content: flex-start; gap: 8px; }
+    .btn-action { width: 32px; height: 32px; font-size: 13px; }
+    .btn-sm-note { padding: 5px 10px; font-size: 11px; }
+
+    /* INSIGHTS MOBILE */
+    #overview-insights {
+        padding: 8px 10px 80px 10px !important;
+        gap: 8px !important;
+    }
+
+    /* Grids viram coluna única */
+    #overview-insights > div[style*="grid-template-columns"] {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* Cards de gráfico em mobile */
+    #overview-insights canvas {
+        max-height: 160px !important;
+    }
+
+    /* SDR e Closer cards empilhados */
+    #sdr-cards-container,
+    #closer-cards-container {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Linha 1 dos insights */
+    #overview-insights > div:nth-child(2) {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* MODAIS MOBILE */
+    .parhub-modal-overlay { padding: 0; align-items: flex-end; }
+    .parhub-modal-box {
+        border-radius: 16px 16px 0 0;
+        max-width: 100% !important;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 20px 16px;
+    }
+
+    /* FORMULÁRIO MOBILE — coluna única */
+    .form-row-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .input-container input,
+    .input-container select,
+    .premium-textarea {
+        font-size: 16px !important; /* evita zoom automático do iOS */
+        padding: 10px !important;
+    }
+
+    /* USUÁRIO NA NAVBAR */
+    #user-display-name { display: none; }
+    .user-profile-menu { border-left: none; padding-left: 0; margin-left: 0; }
+}
+
+@media (max-width: 400px) {
+    .top-logo { max-height: 22px; }
+    .user-avatar-small { width: 28px; height: 28px; }
+}
